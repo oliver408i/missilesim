@@ -144,7 +144,7 @@ function explode() {
 
         setTimeout(() => {
             // Visualize the final position of the missile and target
-            const positionMarker = new THREE.Mesh(new THREE.SphereGeometry(0.1), new THREE.MeshBasicMaterial({ color: 0xFFA500}));
+            const positionMarker = new THREE.Mesh(new THREE.SphereGeometry(0.1), new THREE.MeshBasicMaterial({ roughness:0.8, color: 0xFFA500}));
             positionMarker.position.copy(camera.position);
             scene.add(positionMarker);
 
