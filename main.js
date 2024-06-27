@@ -241,7 +241,7 @@ document.addEventListener('keyup', (event) => {
     keyState[event.key] = false;
 }, false);
 
-const spriteMaterial = new THREE.SpriteMaterial({ map:  new THREE.TextureLoader().load('assets/sight.png')});
+const spriteMaterial = new THREE.SpriteMaterial({ map:  new THREE.TextureLoader().load('assets/'+global.missileSpecs.sightImage+'.png')});
 const sprite = new THREE.Sprite(spriteMaterial);
 // Position the sprite in front of the camera
 sprite.position.set(0, 0, -1);

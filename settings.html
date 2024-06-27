@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Difficulty settings</title>
+    <style>
+        label {
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
     <form id="dropdownForm">
@@ -41,6 +46,16 @@
         <p>Distance in meters at which the missile will automatically detonate. Affects all proxy fuse modes.</p>
         <input type="number" id="proxyFuseDistance" name="proxyFuseDistance" min="1" max="10" value="5"/>
         <br><br>
+
+        <label for="sight">Sight</label>
+        <p>Which sight to use</p>
+        <select id="sight" name="sight">
+            <option value="sight">Default Full Sight</option>
+            <option value="cleansight">Minimal Sight</option>
+            <option value="crosshair">Crosshair Only</option>
+        </select>
+
+        <br><br>
         
         <button type="button" onclick="saveToLocalStorage()">Save & Begin</button>
     </form>
@@ -54,18 +69,22 @@
             document.getElementById('proxyFuse').value = data.proxyFuse;
             document.getElementById('proxyFuseDistance').value = data.proxyFuseDistance;
             document.getElementById('rangefinderMode').value = data.rangefinderMode;
+            document.getElementById('sight').value = data.sightImage;
         }
         function saveToLocalStorage() {
             const irccm = document.getElementById('irccm').value;
             const proxyFuse = document.getElementById('proxyFuse').value;
             const proxyFuseDistance = document.getElementById('proxyFuseDistance').value;
             const rangefinderMode = document.getElementById('rangefinderMode').value;
+            const sight = document.getElementById('sight').value;
 
             const data = {
                 irccmMode: irccm,
                 proxyFuse: proxyFuse,
                 proxyFuseDistance: proxyFuseDistance,
-                rangefinderMode: rangefinderMode
+                rangefinderMode: rangefinderMode,
+                sightImage: sight
+
             };
             
             localStorage.setItem('missileSpecs', JSON.stringify(data));
