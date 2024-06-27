@@ -94,7 +94,7 @@ scene.add(cube);
 
 const distanceThreshold = 5; // Adjust this value as needed
 const target = cube
-const targetDistance = 500; // Distance in front of the camera
+const targetDistance = 300; // Distance in front of the camera
 const targetRange = 100; // Range within which the target can be placed around the center
 
 
