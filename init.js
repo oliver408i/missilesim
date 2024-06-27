@@ -15,6 +15,8 @@ export function init() {
 
     if (global.missileSpecs.rangefinderMode === 'linear') {
         infoText += "\nLaser: Front-Linear";
+    } else if (global.missileSpecs.rangefinderMode === 'omni') {
+        infoText += "\nLaser: Omnidirectional";
     }
 
     if (global.missileSpecs.proxyFuse === 'autoTargetting') {

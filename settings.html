@@ -22,8 +22,7 @@
         <br><br>
         
         <label for="proxyFuse">Proxy Fuse</label>
-        <p>Proxy fuse will automatically detonate the missile once it gets in a certain distance of a certain object. Auto targetting will only target the actual object. Rangefinder mode will detonate the missile when the rangefinder encounters any close object.</p>
-        <br>
+        <p>Proxy fuse will automatically detonate the missile once it gets in a certain distance of a certain object. Auto targetting will only target the actual object. Rangefinder mode will detonate the missile when the rangefinder encounters any close object. Rangefinder mode only works if the rangefinder is in front-learn mode</p>
         <select id="proxyFuse" name="proxyFuse">
             <option value="None">Off</option>
             <option value="autoTargetting">Auto Targetting</option>
@@ -33,10 +32,11 @@
         <br><br>
 
         <label for="rangefinderMode">Rangefinder Mode</label>
-        <p>The laser rangefinder will display how far away an object is. Linear mode looks for the closest object directly in front of the missile.</p>
+        <p>The laser rangefinder will display how far away an object is. Linear mode looks for the closest object directly in front of the missile. Omnidirectional finds the closest object in all directions.</p>
         <select id="rangefinderMode" name="rangefinderMode">
             <option value="None">Off</option>
             <option value="linear">Front-Linear</option>
+            <option value="omni">Omnidirectional</option>
         </select>
 
         <br><br>

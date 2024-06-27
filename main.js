@@ -342,8 +342,26 @@ function animate() {
 
     if (global.missileSpecs.rangefinderMode === "linear") {
         checkIntersections();
+    } else if (global.missileSpecs.rangefinderMode === "omni") {
+        const rangefinder = document.getElementById('rangefinder');
+        // Find the nearest object
+        let nearestObject = null;
+        let nearestDistance = Infinity;
+        const objects = scene.children;
+        for (let i = 0; i < objects.length; i++) {
+            const object = objects[i];
+            const distance = camera.position.distanceTo(object.position);
+            if (distance < nearestDistance && objects[i] != sprite && objects[i] != camera && distance <= 100) {
+                nearestObject = object;
+                nearestDistance = distance;
+            }
+        }
+        if (nearestObject) {
+            rangefinder.innerText = nearestDistance.toFixed(2) + 'm';
+        } else {
+            rangefinder.innerText = '--';
+        }
     }
-
     composer.render();
 
 
