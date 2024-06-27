@@ -93,7 +93,12 @@
         <canvas id="3dcanvas"></canvas>
         <canvas style="display:none" id="overlayCanvas"></canvas>
         
-    
+        <script>
+            // Check if settings are in localstorge
+            if (!localStorage.getItem('missileSpecs')) {
+                location.replace('/settings.html');
+            }
+        </script>
 		<script type="module" src="/main.js"></script>
 
         <div class="debug-txt">test</div>

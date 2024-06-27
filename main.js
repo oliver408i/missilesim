@@ -11,10 +11,15 @@ import { addMarkerToSphere } from './irccm.js';
 
 import { init } from './init.js';
 
+/*
 global.missileSpecs = {
     irccmMode: 'outliner',
-    rangefinderMode: 'linear'
-}
+    rangefinderMode: 'linear',
+    proxyFuse: 'laser', // 'laser' or 'autoTargetting'
+    proxyFuseDistance: 5,
+}*/
+
+global.missileSpecs = JSON.parse(localStorage.getItem('missileSpecs'));
 
 init();
 
@@ -66,6 +71,10 @@ function createFlare(position) {
 }
 
 function checkIntersections() {
+    // Do not use rangefinder until at least 100 ms has passed
+    if (clock.getElapsedTime() < 0.1) {
+      return;
+    }
     // Set the raycaster from the camera's position and direction
     raycaster.set(camera.position, camera.getWorldDirection(new THREE.Vector3()));
     raycaster.camera = camera;
@@ -81,6 +90,10 @@ function checkIntersections() {
 
     if (intersects.length > 1) {
       rangefinder.innerText = intersects[1].distance.toFixed(2);
+
+      if (global.missileSpecs.proxyFuse === "laser" && intersects[1].distance < global.missileSpecs.proxyFuseDistance) {
+        explode();
+      }
     } else {
       rangefinder.innerText = '--';
     }
@@ -113,6 +126,11 @@ function checkDistanceToTarget() {
         document.getElementById('gameOver').innerText = 'Game Over: Missed Target';
         document.getElementById('gameOver').style.display = 'block';
         cancelAnimationFrame(id); // Stop the animation
+    }
+    if (global.missileSpecs.proxyFuse === 'autoTargetting') {
+        if (camera.position.distanceTo(target.position) < global.missileSpecs.proxyFuseDistance) {
+            explode();
+        }
     }
 }
 
@@ -162,7 +180,7 @@ function explode() {
 
             controls.target.set(target.position.x, target.position.y, target.position.z);
 
-            controls.minDistance = 5;
+            controls.minDistance = 6;
             
             function endGameAnimation() {
                 requestAnimationFrame(endGameAnimation);

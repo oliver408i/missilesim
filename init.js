@@ -17,6 +17,12 @@ export function init() {
         infoText += "\nLaser: Front-Linear";
     }
 
+    if (global.missileSpecs.proxyFuse === 'autoTargetting') {
+        infoText += "\nProximity Fuse: Auto Target";
+    } else if (global.missileSpecs.proxyFuse === 'laser') {
+        infoText += "\nProximity Fuse: Laser";
+    }
+
     document.getElementById('info').innerText = infoText;
 
 }
