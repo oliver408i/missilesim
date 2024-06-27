@@ -96,7 +96,9 @@
         <script>
             // Check if settings are in localstorge
             if (!localStorage.getItem('missileSpecs')) {
-                location.href = 'settings.html';
+                var currentPath = window.location.pathname;
+                var newPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + "/settings.html";
+                window.location.href = newPath;
             }
         </script>
 		<script type="module" src="/main.js"></script>

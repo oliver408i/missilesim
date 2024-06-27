@@ -69,7 +69,9 @@
             };
             
             localStorage.setItem('missileSpecs', JSON.stringify(data));
-            location.href = 'index.html';
+            var currentPath = window.location.pathname;
+            var newPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + "/index.html";
+            window.location.href = newPath;
         }
     </script>
 </body>
