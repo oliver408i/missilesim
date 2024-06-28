@@ -20,6 +20,7 @@ global.missileSpecs = {
 }*/
 
 global.missileSpecs = JSON.parse(localStorage.getItem('missileSpecs'));
+global.difficultyData = JSON.parse(localStorage.getItem('difficultyData'));
 
 init();
 
@@ -105,10 +106,10 @@ const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
 cube.position.x = 0;
 scene.add(cube);
 
-const distanceThreshold = 10; // Adjust this value as needed
+const distanceThreshold = global.difficultyData.distanceThreshold; // Adjust this value as needed
 const target = cube
-const targetDistance = 500; // Distance in front of the camera
-const targetRange = 200; // Range within which the target can be placed around the center
+const targetDistance = global.difficultyData.targetDistance; // Distance in front of the camera
+const targetRange = targetDistance/2; // Range within which the target can be placed around the center
 
 
 
@@ -148,6 +149,14 @@ function explode() {
             positionMarker.position.copy(camera.position);
             scene.add(positionMarker);
 
+            
+            global.missileModel.position.copy(positionMarker.position);
+            
+            // Copy rotation data from camera to the model
+            global.missileModel.rotation.copy(camera.rotation);
+            global.missileModel.scale.set(0.01, 0.01, -0.01);
+            scene.add(global.missileModel);
+
             // Draw the edges of the cube
             const edges = new THREE.EdgesGeometry(target.geometry);
             const lineMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00 });
@@ -180,7 +189,7 @@ function explode() {
 
             controls.target.set(target.position.x, target.position.y, target.position.z);
 
-            controls.minDistance = distanceThreshold + 2;
+            controls.minDistance = distance.toFixed(2)+3;
             
             function endGameAnimation() {
                 requestAnimationFrame(endGameAnimation);

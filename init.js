@@ -1,5 +1,6 @@
 import global from './variableHandler.js';
 import { createThermalShaderMaterial } from './thermalShader.js';
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import * as THREE from 'three';
 
 export function init() {
@@ -10,6 +11,14 @@ export function init() {
     global.light = new THREE.HemisphereLight();
     global.scene.add(global.light);
     global.scene.fog = new THREE.Fog(0x000000, 0, 750);
+
+    new OBJLoader().load("assets/sidewinder.obj", function(object) {
+        const mesh = object.children[0];
+        mesh.material = new THREE.MeshLambertMaterial({color: "#FFFFFF"});
+        mesh.geometry.center();
+        console.log(mesh.geometry.attributes.position);
+        global.missileModel = mesh;
+    });
 
     var infoText = "IR Seeker: Tracking";
 

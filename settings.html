@@ -56,6 +56,19 @@
         </select>
 
         <br><br>
+
+        <h3>Difficulty Settings</h3>
+        <label for="targetDistance">Target Distance</label>
+        <p>How far away should the target spawn.</p>
+        <input type="number" id="targetDistance" name="targetDistance" min="100" max="500" value="200"/>
+        
+        <br><br>
+
+        <label for="distanceThreshold">Distance Threshold</label>
+        <p>How close the missile needs to be to the target when it explodes to count as a hit.</p>
+        <input type="number" id="distanceThreshold" name="distanceThreshold" min="2" max="20" value="10"/>
+
+        <br><br>
         
         <button type="button" onclick="saveToLocalStorage()">Save & Begin</button>
     </form>
@@ -64,12 +77,16 @@
         // Load old settings if they exist
         if (localStorage.getItem('missileSpecs')) {
             const data = JSON.parse(localStorage.getItem('missileSpecs'));
+            const difficultyData = JSON.parse(localStorage.getItem('difficultyData'));
 
             document.getElementById('irccm').value = data.irccmMode;
             document.getElementById('proxyFuse').value = data.proxyFuse;
             document.getElementById('proxyFuseDistance').value = data.proxyFuseDistance;
             document.getElementById('rangefinderMode').value = data.rangefinderMode;
             document.getElementById('sight').value = data.sightImage;
+
+            document.getElementById('targetDistance').value = difficultyData.targetDistance;
+            document.getElementById('distanceThreshold').value = difficultyData.distanceThreshold;
         }
         function saveToLocalStorage() {
             const irccm = document.getElementById('irccm').value;
@@ -77,6 +94,12 @@
             const proxyFuseDistance = document.getElementById('proxyFuseDistance').value;
             const rangefinderMode = document.getElementById('rangefinderMode').value;
             const sight = document.getElementById('sight').value;
+
+            const difficultyData = {
+                targetDistance: document.getElementById('targetDistance').value,
+                distanceThreshold: document.getElementById('distanceThreshold').value
+            };
+            localStorage.setItem('difficultyData', JSON.stringify(difficultyData));
 
             const data = {
                 irccmMode: irccm,
