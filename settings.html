@@ -69,6 +69,18 @@
         <input type="number" id="distanceThreshold" name="distanceThreshold" min="2" max="20" value="10"/>
 
         <br><br>
+
+        <label for="flareChance">Flare Chance</label>
+        <p>Chance for a flare burst to be deployed every tick.</p>
+        <input type="number" id="flareChance" name="flareChance" min="0" max="0.1" value="0.02"/>
+
+        <br><br>
+
+        <label for="flareCount">Flare Max Count</label>
+        <p>How many flares (at max) can be deployed by the target.</p>
+        <input type="number" id="flareCount" name="flareCount" min="1" max="20" value="10"/>
+
+        <br><br>
         
         <button type="button" onclick="saveToLocalStorage()">Save & Begin</button>
     </form>
@@ -87,6 +99,8 @@
 
             document.getElementById('targetDistance').value = difficultyData.targetDistance;
             document.getElementById('distanceThreshold').value = difficultyData.distanceThreshold;
+            document.getElementById('flareChance').value = data.flareChance;
+            document.getElementById('flareCount').value = data.flareCount;
         }
         function saveToLocalStorage() {
             const irccm = document.getElementById('irccm').value;
@@ -97,7 +111,9 @@
 
             const difficultyData = {
                 targetDistance: document.getElementById('targetDistance').value,
-                distanceThreshold: document.getElementById('distanceThreshold').value
+                distanceThreshold: document.getElementById('distanceThreshold').value,
+                flareChance: document.getElementById('flareChance').value,
+                flareCount: document.getElementById('flareCount').value
             };
             localStorage.setItem('difficultyData', JSON.stringify(difficultyData));
 

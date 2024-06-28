@@ -185,11 +185,11 @@ function explode() {
             controls.enableDamping = true; // Enable damping (inertia)
             controls.dampingFactor = 0.25; // Damping factor
             controls.screenSpacePanning = false; // Disable panning
-            controls.maxPolarAngle = Math.PI / 2; // Limit the vertical rotation angle
 
             controls.target.set(target.position.x, target.position.y, target.position.z);
 
-            controls.minDistance = distance.toFixed(2)+3;
+            controls.minDistance = Math.round(distance)+5;
+            controls.maxDistance = controls.minDistance + 10;
             
             function endGameAnimation() {
                 requestAnimationFrame(endGameAnimation);
@@ -337,9 +337,10 @@ function animate() {
     checkDistanceToTarget();
 
     
-    // Randomly create flares from the target's position in clusters of 3-5
+    // Randomly create flares from the target's position in clusters of 1 - flareCount
     if (Math.random() < 0.02) {
-        const numFlares = 3 + Math.floor(Math.random() * 3);
+        const flareCountCeiling = global.difficultyData.flareCount;
+        const numFlares = Math.floor(Math.random() * flareCountCeiling) + 1;
         for (let i = 0; i < numFlares; i++) {
             createFlare(target.position);
         }
