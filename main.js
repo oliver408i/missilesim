@@ -105,10 +105,10 @@ const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
 cube.position.x = 0;
 scene.add(cube);
 
-const distanceThreshold = 5; // Adjust this value as needed
+const distanceThreshold = 10; // Adjust this value as needed
 const target = cube
-const targetDistance = 300; // Distance in front of the camera
-const targetRange = 100; // Range within which the target can be placed around the center
+const targetDistance = 500; // Distance in front of the camera
+const targetRange = 200; // Range within which the target can be placed around the center
 
 
 
@@ -144,7 +144,7 @@ function explode() {
 
         setTimeout(() => {
             // Visualize the final position of the missile and target
-            const positionMarker = new THREE.Mesh(new THREE.SphereGeometry(0.1), new THREE.MeshBasicMaterial({ roughness:0.8, color: 0xFFA500}));
+            const positionMarker = new THREE.Mesh(new THREE.SphereGeometry(0.1), new THREE.MeshLambertMaterial({color: 0xFFA500}));
             positionMarker.position.copy(camera.position);
             scene.add(positionMarker);
 
@@ -180,7 +180,7 @@ function explode() {
 
             controls.target.set(target.position.x, target.position.y, target.position.z);
 
-            controls.minDistance = 6;
+            controls.minDistance = distanceThreshold + 2;
             
             function endGameAnimation() {
                 requestAnimationFrame(endGameAnimation);
@@ -225,11 +225,39 @@ camera.position.z = 5;
 // For updating heat value
 let heatDirection = 0.5;
 let heatValue = 100;
+let timer = 0;
 
+const targetVelocity = new THREE.Vector3(0,0,-0.5);
+const moveSpeed = 1.5;
+const targetRotation = new THREE.Vector3();
+
+function updateTargetRotation() {
+    targetRotation.set(
+      Math.random() * 2 * Math.PI, // Randomize X-axis rotation
+      cube.rotation.y,              // Keep Y-axis rotation constant
+      Math.random() * 2 * Math.PI  // Randomize Z-axis rotation
+    );
+    // Generate random velocity changes for target from +- 0.5
+    const vChange = new THREE.Vector3(
+      Math.random() * 1 - 0.5,
+      0,
+      Math.random() * 1 - 0.5
+    );
+
+    targetVelocity.add(vChange);
+
+    // Max velocity is 1
+    targetVelocity.set(
+      THREE.MathUtils.clamp(targetVelocity.x, -1, 1),
+      THREE.MathUtils.clamp(targetVelocity.y, -1, 1),
+      THREE.MathUtils.clamp(targetVelocity.z, -1, 1)
+    )
+  }
+  
 
 let targetRotationX = 0;
 let targetRotationY = 0;
-const rotationSpeed = 0.02; // Adjust this value for smoother/slower or quicker turning
+const rotationSpeed = 0.05; // Adjust this value for smoother/slower or quicker turning
 
 const keyState = {};
 
@@ -250,17 +278,11 @@ sprite.layers.set(0);
 camera.add(sprite); // Add sprite to the camera
 scene.add(camera);
 
-const moveSpeed = 0.2;
+let currentV = targetVelocity;
 let id;
 
 function animate() {
   id = requestAnimationFrame(animate);
-
-  // Rotate the cube
-  cube.rotation.x += 0.01;
-  cube.rotation.y += 0.01;
-
-  cube.x += 5;
 
   // Update heat value
   heatValue += heatDirection;
@@ -275,7 +297,7 @@ function animate() {
   // Apply heat value to objects
   cube.material.uniforms.heat.value = heatValue;
 
-  const turnSpeed = Math.PI / 360;
+  const turnSpeed = 0.02;
 
     if (keyState['w']) {
         targetRotationX += turnSpeed;
@@ -316,6 +338,17 @@ function animate() {
     
 
     const deltaTime = clock.getDelta();
+
+    timer += deltaTime;
+
+    if (timer >= 2) {
+        updateTargetRotation();
+        timer = 0;
+    }
+
+    currentV.lerp(targetVelocity, 0.4);
+
+    target.position.add(currentV);
     
     // Update each flare and remove it if it has no heat left
     for (let i = flares.length - 1; i >= 0; i--) {

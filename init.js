@@ -7,6 +7,9 @@ export function init() {
     global.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     global.renderer = new THREE.WebGLRenderer({canvas: document.getElementById('3dcanvas'),antialias: true});
     global.clock = new THREE.Clock();
+    global.light = new THREE.HemisphereLight();
+    global.scene.add(global.light);
+    global.scene.fog = new THREE.Fog(0x000000, 0, 750);
 
     var infoText = "IR Seeker: Tracking";
 
@@ -28,19 +31,20 @@ export function init() {
 
     document.getElementById('info').innerText = infoText;
 
-    var xS = 63, yS = 63;
+    var xS = 200, yS = 200;
+    const size = 4092;
     const terrainScene = window.THREETerrain({
         easing: window.THREETerrain.Linear,
         frequency: 2.5,
-        heightmap: window.THREETerrain.PerlinDiamond,
-        material: createThermalShaderMaterial(20),
+        heightmap: window.THREETerrain.Fault,
+        material: new THREE.MeshLambertMaterial({color: "#9A9A9A"}),
         maxHeight: -100,
         minHeight: -200,
         steps: 1,
         xSegments: xS,
-        xSize: 1024,
+        xSize: size,
         ySegments: yS,
-        ySize: 1024,
+        ySize: size,
     });
     // Assuming you already have your global scene, add the terrain to it
     global.scene.add(terrainScene);
@@ -50,7 +54,7 @@ export function init() {
     var geo = terrainScene.children[0].geometry;
     // Add randomly distributed foliage
     const decoScene = window.THREETerrain.ScatterMeshes(geo, {
-        mesh: new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 12, 6), createThermalShaderMaterial(50)),
+        mesh: new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 12, 6), new THREE.MeshLambertMaterial({color: "#E8E8E8"})),
         w: xS,
         h: yS,
         spread: 0.02,
