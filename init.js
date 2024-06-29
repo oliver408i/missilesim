@@ -1,6 +1,7 @@
 import global from './variableHandler.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import * as THREE from 'three';
+import Stats from 'stats';
 
 export function init() {
     global.scene = new THREE.Scene();
@@ -10,6 +11,15 @@ export function init() {
     global.light = new THREE.HemisphereLight();
     global.scene.add(global.light);
     global.scene.fog = new THREE.Fog(0x000000, 0, 750);
+
+    global.stats = new Stats();
+    document.body.appendChild(global.stats.dom);
+    
+    const showFPS = localStorage.getItem('showFPS');
+    if (showFPS != "None") {
+        global.stats.showPanel(parseInt(showFPS));
+    }
+    
 
     new OBJLoader().load("assets/sidewinder.obj", function(object) {
         const mesh = object.children[0];
@@ -37,6 +47,10 @@ export function init() {
         ySegments: yS,
         ySize: size,
     });
+
+    global.terrainMesh = terrainScene.children[0];
+    console.log(global.terrainMesh);
+
     // Assuming you already have your global scene, add the terrain to it
     global.scene.add(terrainScene);
 

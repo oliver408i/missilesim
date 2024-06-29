@@ -98,6 +98,13 @@ window.addEventListener('message', (event) => {
         INIT.hideMainMenu();
         INIT.initText();
         startGame();
+    } else if (event.data == "grabNewShowFPSSetting") {
+        const showFPS = localStorage.getItem('showFPS');
+        if (showFPS != "None") {
+            global.stats.showPanel(parseInt(showFPS));
+        } else {
+            global.stats.domElement.style.display = 'none';
+        }
     }
 })
 
@@ -174,7 +181,16 @@ function explode() {
     }
 }
 
-
+function isCameraNearTerrain(camera, terrainMesh, threshold = 2) {
+    const raycaster = new THREE.Raycaster();
+    const down = new THREE.Vector3(0, -1, 0);
+    raycaster.set(camera.position, down);
+    const intersects = raycaster.intersectObject(terrainMesh);
+    if (intersects.length > 0 && intersects[0].distance < threshold) {
+        return true;
+    }
+    return false;
+}
 
 function isMeshVisible(camera, mesh) {
     // Create a frustum
@@ -214,6 +230,12 @@ function checkDistanceToTarget(timeDelta) {
         if (camera.position.distanceTo(target.position) < global.missileSpecs.proxyFuseDistance) {
             explode();
         }
+    }
+
+    if (isCameraNearTerrain(camera, global.terrainMesh)) {
+        document.getElementById('gameOver').innerText = 'Game Over: Crashed into Terrain';
+        document.getElementById('gameOver').style.display = 'block';
+        cancelAnimationFrame(id); // Stop the animation
     }
 }
 
@@ -327,6 +349,8 @@ function startGame() {
 
     function animate() {
         id = requestAnimationFrame(animate);
+
+        global.stats.begin();
 
         // Update heat value
         heatValue += heatDirection;
@@ -443,6 +467,8 @@ function startGame() {
                 }
             }
             composer.render();
+
+            global.stats.end();
 
 
 

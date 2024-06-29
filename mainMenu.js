@@ -31,18 +31,13 @@ export function initMainMenu() {
 
 }
 
-function genRandomPos(threshold) {
-    // Negative or positive
-    const sign = Math.random() > 0.5 ? 1 : -1;
-    threshold = sign * threshold;
-    return new THREE.Vector3(Math.random()*threshold, Math.random()*threshold, Math.random()*threshold);
-}
-
 let angle = 0;
 const radius = 1; // Radius of the circle
 
 function mainMenuAnimation() {
+    
     global.mainMenuAnimation = requestAnimationFrame(mainMenuAnimation);
+    global.stats.begin();
 
     global.camera.position.x = -5+(Math.sin(angle) * Math.PI/2)/2;
     global.camera.position.y = 5+(Math.cos(angle) * Math.PI/2)/2;
@@ -50,7 +45,9 @@ function mainMenuAnimation() {
     angle += Math.PI/200;
 
     if (global.missileModel) {
-        global.missileModel.rotation.z = Math.sin(angle) * Math.PI/2;
+        global.missileModel.rotation.z = Math.sin(angle) * Math.PI/4;
     }
     global.renderer.render(global.scene, global.camera);
+
+    global.stats.end();
 }
