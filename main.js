@@ -3,25 +3,14 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
 import { createThermalShaderMaterial } from './thermalShader.js';
 import { Flare } from './flare.js';
 import global from './variableHandler.js';
 import { addMarkerToSphere } from './irccm.js';
 
-
-
-
-
 import * as INIT from './init.js';
 import { initMainMenu } from './mainMenu.js';
-
-/*
-global.missileSpecs = {
-    irccmMode: 'outliner',
-    rangefinderMode: 'linear',
-    proxyFuse: 'laser', // 'laser' or 'autoTargetting'
-    proxyFuseDistance: 5,
-}*/
 
 global.missileSpecs = JSON.parse(localStorage.getItem('missileSpecs'));
 global.difficultyData = JSON.parse(localStorage.getItem('difficultyData'));
@@ -185,6 +174,8 @@ function explode() {
     }
 }
 
+
+
 function isMeshVisible(camera, mesh) {
     // Create a frustum
     const frustum = new THREE.Frustum();
@@ -206,11 +197,18 @@ function isMeshVisible(camera, mesh) {
     return frustum.intersectsBox(meshBoundingBox);
 }
 
-function checkDistanceToTarget() {
+function checkDistanceToTarget(timeDelta) {
     if (!isMeshVisible(camera, target) && camera.position.distanceTo(target.position) > distanceThreshold) {
-        document.getElementById('gameOver').innerText = 'Game Over: Missed Target';
-        document.getElementById('gameOver').style.display = 'block';
-        cancelAnimationFrame(id); // Stop the animation
+        if (meshNotVisibleFor > global.difficultyData.missThreshold) {
+            document.getElementById('gameOver').innerText = 'Game Over: Missed Target';
+            document.getElementById('gameOver').style.display = 'block';
+            cancelAnimationFrame(id); // Stop the animation
+        } else {
+            meshNotVisibleFor += timeDelta;
+        }
+        
+    } else {
+        meshNotVisibleFor = 0;
     }
     if (global.missileSpecs.proxyFuse === 'autoTargetting') {
         if (camera.position.distanceTo(target.position) < global.missileSpecs.proxyFuseDistance) {
@@ -248,6 +246,7 @@ let id;
 let targetRotation;
 let targetVelocity;
 let sprite;
+let meshNotVisibleFor = 0;
 
 function startGame() {
     
@@ -369,8 +368,10 @@ function startGame() {
             direction.applyQuaternion(camera.quaternion);
             camera.position.addScaledVector(direction, moveSpeed);
 
+            const deltaTime = clock.getDelta();
+
             // Check the distance to the target
-            checkDistanceToTarget();
+            checkDistanceToTarget(deltaTime);
 
             
             // Randomly create flares from the target's position in clusters of 1 - flareCount
@@ -383,7 +384,7 @@ function startGame() {
             }
             
 
-            const deltaTime = clock.getDelta();
+            
 
             timer += deltaTime;
 

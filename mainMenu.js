@@ -26,9 +26,6 @@ export function initMainMenu() {
     global.camera.lookAt(0,0,0);
     global.camera.position.setX(-10);
     global.camera.position.setZ(5);
-    
-
-    
 
     mainMenuAnimation();
 
@@ -47,10 +44,13 @@ const radius = 1; // Radius of the circle
 function mainMenuAnimation() {
     global.mainMenuAnimation = requestAnimationFrame(mainMenuAnimation);
 
-    
-    global.camera.position.x = -5+radius * Math.cos(angle);
-    global.camera.position.y = 5+radius * Math.sin(angle);
+    global.camera.position.x = -5+(Math.sin(angle) * Math.PI/2)/2;
+    global.camera.position.y = 5+(Math.cos(angle) * Math.PI/2)/2;
     global.flame.update(global.clock.getElapsedTime()*5);
-    angle += 0.01
+    angle += Math.PI/200;
+
+    if (global.missileModel) {
+        global.missileModel.rotation.z = Math.sin(angle) * Math.PI/2;
+    }
     global.renderer.render(global.scene, global.camera);
 }

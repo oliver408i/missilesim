@@ -1,5 +1,4 @@
 import global from './variableHandler.js';
-import { createThermalShaderMaterial } from './thermalShader.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import * as THREE from 'three';
 
@@ -21,11 +20,6 @@ export function init() {
         mesh.layers.set(1)
         global.missileModel.scale.set(0.01, 0.01, -0.01);
     });
-
-    
-    
-
-    
     
 
     var xS = 200, yS = 200;

@@ -109,6 +109,12 @@
 
         <br><br>
 
+        <label for="missThreshold">Miss Time Threshold</lable>
+        <p>How long in seconds the target can be out of the missile's FOV until it is considered missed.</p>
+        <input type="number" id="missThreshold" name="missThreshold" min="0" max="5" value="2"/>
+
+        <br><br>
+
         <label for="flareChance">Flare Chance</label>
         <p>Chance for a flare burst to be deployed every tick.</p>
         <input type="number" id="flareChance" name="flareChance" min="0" max="0.1" value="0.02"/>
@@ -137,6 +143,7 @@
             document.getElementById('distanceThreshold').value = difficultyData.distanceThreshold;
             document.getElementById('flareChance').value = difficultyData.flareChance;
             document.getElementById('flareCount').value = difficultyData.flareCount;
+            document.getElementById('missThreshold').value = difficultyData.missThreshold;
         }
 
         function saveToLocalStorage() {
@@ -151,7 +158,8 @@
                 targetDistance: document.getElementById('targetDistance').value,
                 distanceThreshold: document.getElementById('distanceThreshold').value,
                 flareChance: document.getElementById('flareChance').value,
-                flareCount: document.getElementById('flareCount').value
+                flareCount: document.getElementById('flareCount').value,
+                missThreshold: document.getElementById('missThreshold').value
             };
             localStorage.setItem('difficultyData', JSON.stringify(difficultyData));
 
