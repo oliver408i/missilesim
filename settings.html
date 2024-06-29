@@ -7,7 +7,43 @@
     <style>
         label {
             font-weight: bold;
+            color: white;
         }
+        p {
+            color: white;
+        }
+        
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        
+        /* Track */
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        /* Handle */
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 5px;
+        }
+        
+        /* Handle on hover */
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 1);
+        }
+        
+        /* Handle on set */
+        ::-webkit-scrollbar-thumb:active {
+            background: rgba(255, 255, 255, 0.8);
+        }
+        
+        /* Handle on set */
+        ::-webkit-scrollbar-thumb:window-inactive {
+            background: rgba(255, 255, 255, 0.4);
+        }
+        
     </style>
 </head>
 <body>
@@ -99,8 +135,8 @@
 
             document.getElementById('targetDistance').value = difficultyData.targetDistance;
             document.getElementById('distanceThreshold').value = difficultyData.distanceThreshold;
-            document.getElementById('flareChance').value = data.flareChance;
-            document.getElementById('flareCount').value = data.flareCount;
+            document.getElementById('flareChance').value = difficultyData.flareChance;
+            document.getElementById('flareCount').value = difficultyData.flareCount;
         }
         function saveToLocalStorage() {
             const irccm = document.getElementById('irccm').value;
@@ -127,9 +163,7 @@
             };
             
             localStorage.setItem('missileSpecs', JSON.stringify(data));
-            var currentPath = window.location.pathname;
-            var newPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + "/index.html";
-            window.location.href = newPath;
+            window.parent.postMessage("startGame");
         }
     </script>
 </body>

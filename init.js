@@ -16,29 +16,17 @@ export function init() {
         const mesh = object.children[0];
         mesh.material = new THREE.MeshLambertMaterial({color: "#FFFFFF"});
         mesh.geometry.center();
-        console.log(mesh.geometry.attributes.position);
         global.missileModel = mesh;
+        global.scene.add(mesh);
+        mesh.layers.set(1)
+        global.missileModel.scale.set(0.01, 0.01, -0.01);
     });
 
-    var infoText = "IR Seeker: Tracking";
+    
+    
 
-    if (global.missileSpecs.irccmMode === 'outliner') {
-        infoText += "\nIRCCM: Flare Outliner";
-    }
-
-    if (global.missileSpecs.rangefinderMode === 'linear') {
-        infoText += "\nLaser: Front-Linear";
-    } else if (global.missileSpecs.rangefinderMode === 'omni') {
-        infoText += "\nLaser: Omnidirectional";
-    }
-
-    if (global.missileSpecs.proxyFuse === 'autoTargetting') {
-        infoText += "\nProximity Fuse: Auto Target";
-    } else if (global.missileSpecs.proxyFuse === 'laser') {
-        infoText += "\nProximity Fuse: Laser";
-    }
-
-    document.getElementById('info').innerText = infoText;
+    
+    
 
     var xS = 200, yS = 200;
     const size = 4092;
@@ -71,4 +59,35 @@ export function init() {
     });
     terrainScene.add(decoScene);
 
+}
+
+export function initText() {
+    var infoText = "IR Seeker: Tracking";
+
+    if (global.missileSpecs.irccmMode === 'outliner') {
+        infoText += "\nIRCCM: Flare Outliner";
+    }
+
+    if (global.missileSpecs.rangefinderMode === 'linear') {
+        infoText += "\nLaser: Front-Linear";
+    } else if (global.missileSpecs.rangefinderMode === 'omni') {
+        infoText += "\nLaser: Omnidirectional";
+    }
+
+    if (global.missileSpecs.proxyFuse === 'autoTargetting') {
+        infoText += "\nProximity Fuse: Auto Target";
+    } else if (global.missileSpecs.proxyFuse === 'laser') {
+        infoText += "\nProximity Fuse: Laser";
+    }
+
+    document.getElementById('info').innerText = infoText;
+
+}
+
+export function hideMainMenu() {
+    global.flame.layers.set(1);
+    global.missileModel.layers.set(1);
+
+    document.getElementById('settingsPageIframe').style.display = 'none';
+    document.getElementById('title').style.display = 'none';
 }

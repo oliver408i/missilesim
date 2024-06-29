@@ -75,6 +75,23 @@
                 color: rgb(9, 255, 0);
                 padding: 10px;
                 }
+            #title {
+                position: absolute;
+                top: 10%;
+                left: 10%;
+                font: 50px SHP;
+                color: rgb(255, 255, 255);
+                padding: 10px;
+                }
+            #settingsPageIframe {
+                position: absolute;
+                top: 20%;
+                left: 10%;
+                border: none;
+                background-color: transparent;
+                width: 30%;
+                height: 70%;
+            }
 		</style>
         <script type="importmap">
             {
@@ -101,8 +118,12 @@
                 window.location.href = newPath;
             }
         </script>
+        <div id="title">Missle Sim Game</div>
+        <iframe id="settingsPageIframe" src="settings.html"></iframe>
+
         <script type="module" src="./initThree.js"></script>
-        <script src="THREE.Terrain.min.js" defer></script>
+        <script src="./lib/THREETerrain.js" defer></script>
+        <script src="./lib/THREEFireShader.js" defer></script>
 		<script type="module" src="./main.js" defer></script>
 
         <div class="debug-txt">Loading</div>
