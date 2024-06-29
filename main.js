@@ -101,6 +101,7 @@ window.addEventListener('message', (event) => {
     } else if (event.data == "grabNewShowFPSSetting") {
         const showFPS = localStorage.getItem('showFPS');
         if (showFPS != "None") {
+            global.stats.domElement.style.display = 'block';
             global.stats.showPanel(parseInt(showFPS));
         } else {
             global.stats.domElement.style.display = 'none';
@@ -166,8 +167,11 @@ function explode() {
             
             function endGameAnimation() {
                 requestAnimationFrame(endGameAnimation);
+                global.stats.begin();
                 controls.update();
                 renderer.render(scene, camera);
+
+                global.stats.end();
             }
 
             endGameAnimation();

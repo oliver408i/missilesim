@@ -18,6 +18,8 @@ export function init() {
     const showFPS = localStorage.getItem('showFPS');
     if (showFPS != "None") {
         global.stats.showPanel(parseInt(showFPS));
+    } else {
+        global.stats.domElement.style.display = 'none';
     }
     
 
