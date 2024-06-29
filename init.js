@@ -90,4 +90,5 @@ export function hideMainMenu() {
 
     document.getElementById('settingsPageIframe').style.display = 'none';
     document.getElementById('title').style.display = 'none';
+    document.getElementById('startGameButton').style.display = 'none';
 }

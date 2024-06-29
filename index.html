@@ -90,7 +90,16 @@
                 border: none;
                 background-color: transparent;
                 width: 30%;
-                height: 70%;
+                height: 60%;
+            }
+            #startGameButton {
+                position:absolute;
+                left: 10%;
+                bottom: 10%;
+                font: 30px SHP;
+                color: yellow;
+                padding: 10px;
+                cursor: pointer; 
             }
 		</style>
         <script type="importmap">
@@ -105,19 +114,11 @@
 	<body>
         
         <div id="gameOver" class="info-txt">You Win!</div>
+        <div id="startGameButton" onclick="window.frames[0].saveToLocalStorage()">Start</div>
     
         
         <canvas id="3dcanvas"></canvas>
         <canvas style="display:none" id="overlayCanvas"></canvas>
-        
-        <script>
-            // Check if settings are in localstorge
-            if (!localStorage.getItem('missileSpecs')) {
-                var currentPath = window.location.pathname;
-                var newPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + "/settings.html";
-                window.location.href = newPath;
-            }
-        </script>
         <div id="title">Missle Sim Game</div>
         <iframe id="settingsPageIframe" src="settings.html"></iframe>
 
@@ -129,6 +130,7 @@
         <div class="debug-txt">Loading</div>
         <div class="gameInfoText" id="info"></div>
         <div class="rangefinder" id="rangefinder"></div>
+
         
         
 	</body>

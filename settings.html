@@ -12,6 +12,9 @@
         p {
             color: white;
         }
+        h3 {
+            color: white;
+        }
         
         /* Hide scrollbar for Chrome, Safari and Opera */
         ::-webkit-scrollbar {
@@ -115,10 +118,7 @@
         <label for="flareCount">Flare Max Count</label>
         <p>How many flares (at max) can be deployed by the target.</p>
         <input type="number" id="flareCount" name="flareCount" min="1" max="20" value="10"/>
-
-        <br><br>
-        
-        <button type="button" onclick="saveToLocalStorage()">Save & Begin</button>
+    
     </form>
 
     <script>
@@ -138,7 +138,9 @@
             document.getElementById('flareChance').value = difficultyData.flareChance;
             document.getElementById('flareCount').value = difficultyData.flareCount;
         }
+
         function saveToLocalStorage() {
+            console.log("Saving settings");
             const irccm = document.getElementById('irccm').value;
             const proxyFuse = document.getElementById('proxyFuse').value;
             const proxyFuseDistance = document.getElementById('proxyFuseDistance').value;
