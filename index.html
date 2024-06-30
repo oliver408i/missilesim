@@ -101,6 +101,15 @@
                 padding: 10px;
                 cursor: pointer; 
             }
+            #help {
+                position:absolute;
+                right: 10%;
+                top: 10%;
+                font: 20px SHP;
+                color: yellow;
+                padding: 10px;
+                cursor: pointer;
+            }
 		</style>
         <script type="importmap">
             {
@@ -115,7 +124,10 @@
 	<body>
         
         <div id="gameOver" class="info-txt">You Win!</div>
+        <div id="help" onclick="showHelp()">Help/Instructions</div>
         <div id="startGameButton" onclick="window.frames[0].saveToLocalStorage()">Start</div>
+
+        <script src="webBasics.js"></script>
     
         
         <canvas id="3dcanvas"></canvas>
