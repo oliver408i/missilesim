@@ -166,7 +166,7 @@ function explode() {
 
             controls.target.set(target.position.x, target.position.y, target.position.z);
 
-            controls.minDistance = Math.round(distance)+7;
+            controls.minDistance = Math.round(distance)+10;
             controls.maxDistance = controls.minDistance + 10;
             
             function endGameAnimation() {
