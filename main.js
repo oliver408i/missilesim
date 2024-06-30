@@ -405,9 +405,13 @@ function startGame() {
                 explode();
             }
 
-            // Smoothly interpolate the camera's rotation towards the target rotation
-            camera.rotation.x += (targetRotationX - camera.rotation.x) * rotationSpeed;
-            camera.rotation.y += (targetRotationY - camera.rotation.y) * rotationSpeed;
+            const currentQuat = camera.quaternion.clone();
+            const targetQuatX = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), targetRotationX);
+            const targetQuatY = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), targetRotationY);
+            const targetQuat = new THREE.Quaternion().multiplyQuaternions(targetQuatY, targetQuatX);
+
+            currentQuat.slerp(targetQuat, rotationSpeed);
+            camera.quaternion.copy(currentQuat);
             if (parseInt(global.miscSettings.controlMode) > 0) camera.rotation.z += (targetRotationZ - camera.rotation.z) * rotationSpeed;
 
             // Move the camera forward

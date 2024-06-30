@@ -9,25 +9,25 @@ export function initMainMenu() {
         console.log(global.missileModel);
         if (global.missileModel != undefined) {
             global.missileModel.layers.set(0);
-            global.missileModel.position.set(0,0,0);
+            global.missileModel.position.set(0,0,-2);
             clearInterval(w);
+
+            global.flame = new Fire( new THREE.TextureLoader().load("assets/fire.png"), new THREE.CylinderGeometry(1,1,1));
+            global.flame.scale.set(0.3,2,0.3);
+            global.flame.rotation.set(Math.PI/2,0,0);
+            global.flame.position.setZ(1.6);
+            global.scene.add(global.flame);
+
+            console.log(global.flame.material.uniforms);
+
+            global.camera.position.set(-5,5,10);
+            global.camera.lookAt(0,0,0);
+            global.camera.position.setX(-10);
+            global.camera.position.setZ(5);
+
+            mainMenuAnimation();
         }
     },100);
-
-    global.flame = new Fire( new THREE.TextureLoader().load("assets/fire.png"), new THREE.CylinderGeometry(1,1,1));
-    global.flame.scale.set(0.3,2,0.3);
-    global.flame.rotation.set(Math.PI/2,0,0);
-    global.flame.position.setZ(2.3);
-    global.scene.add(global.flame);
-
-    console.log(global.flame.material.uniforms);
-
-    global.camera.position.set(-5,5,10);
-    global.camera.lookAt(0,0,0);
-    global.camera.position.setX(-10);
-    global.camera.position.setZ(5);
-
-    mainMenuAnimation();
 
 }
 

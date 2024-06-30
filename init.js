@@ -3,6 +3,18 @@ import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import * as THREE from 'three';
 import Stats from 'stats';
 
+async function loadMissile() {
+    let object = await (new OBJLoader()).loadAsync("assets/sidewinder.obj");
+    const mesh = object.children[0];
+    mesh.material = new THREE.MeshLambertMaterial({color: "#FFFFFF"});
+    mesh.geometry.center();
+    global.missileModel = mesh;
+    global.scene.add(mesh);
+    mesh.layers.set(1)
+    global.missileModel.scale.set(0.01, 0.01, -0.01);
+    global.missileModel.geometry.translate(0,0, -global.missileModel.geometry.boundingBox.max.z);
+}
+
 export function init() {
     global.scene = new THREE.Scene();
     global.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -23,15 +35,7 @@ export function init() {
     }
     
 
-    new OBJLoader().load("assets/sidewinder.obj", function(object) {
-        const mesh = object.children[0];
-        mesh.material = new THREE.MeshLambertMaterial({color: "#FFFFFF"});
-        mesh.geometry.center();
-        global.missileModel = mesh;
-        global.scene.add(mesh);
-        mesh.layers.set(1)
-        global.missileModel.scale.set(0.01, 0.01, -0.01);
-    });
+    loadMissile()
     
 
     var xS = 200, yS = 200;
