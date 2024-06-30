@@ -14,6 +14,7 @@ import { initMainMenu } from './mainMenu.js';
 
 global.missileSpecs = JSON.parse(localStorage.getItem('missileSpecs'));
 global.difficultyData = JSON.parse(localStorage.getItem('difficultyData'));
+global.miscSettings = JSON.parse(localStorage.getItem('miscSettings'));
 
 INIT.init();
 
@@ -152,6 +153,8 @@ function explode() {
             for (let i = 0; i < outlines.length; i++) {
                 outlines[i].layers.set(1);
             }
+
+            
 
             
 
@@ -327,6 +330,7 @@ function startGame() {
 
     let targetRotationX = 0;
     let targetRotationY = 0;
+    let targetRotationZ = 0;
     const rotationSpeed = 0.05; // Adjust this value for smoother/slower or quicker turning
 
     const keyState = {};
@@ -372,16 +376,30 @@ function startGame() {
         const turnSpeed = 0.02;
 
             if (keyState['w']) {
-                targetRotationX += turnSpeed;
+                if (global.miscSettings.controlMode == "2") {
+                    targetRotationX -= turnSpeed;
+                } else {
+                    targetRotationX += turnSpeed;
+                }
             }
             if (keyState['s']) {
-                targetRotationX -= turnSpeed;
+                if (global.miscSettings.controlMode == "2") {
+                    targetRotationX += turnSpeed;
+                } else {
+                    targetRotationX -= turnSpeed;
+                }
             }
             if (keyState['a']) {
                 targetRotationY += turnSpeed;
             }
             if (keyState['d']) {
                 targetRotationY -= turnSpeed;
+            }
+            if (keyState['q'] && parseInt(global.miscSettings.controlMode) > 0) {
+                targetRotationZ += turnSpeed;
+            }
+            if (keyState['e'] && parseInt(global.miscSettings.controlMode) > 0) {
+                targetRotationZ -= turnSpeed;
             }
             if (keyState[' ']) {
                 explode();
@@ -390,6 +408,7 @@ function startGame() {
             // Smoothly interpolate the camera's rotation towards the target rotation
             camera.rotation.x += (targetRotationX - camera.rotation.x) * rotationSpeed;
             camera.rotation.y += (targetRotationY - camera.rotation.y) * rotationSpeed;
+            if (parseInt(global.miscSettings.controlMode) > 0) camera.rotation.z += (targetRotationZ - camera.rotation.z) * rotationSpeed;
 
             // Move the camera forward
             let direction = new THREE.Vector3(0, 0, -1);

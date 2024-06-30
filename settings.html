@@ -138,6 +138,16 @@
             <option value="1">ms</option>
             <option value="2">MB</option>
         </select>
+
+        <br><br>
+
+        <label for="realisticControls">Realistic Controls</label>
+        <p>Use realistic controls. W and S are pitch, A and D are yaw, Q and E are roll.</p>
+        <select id="realisticControls" name="realisticControls">
+            <option value="0">Simple (off)</option>
+            <option value="1">Semi (pitch not inverted)</option>
+            <option value="2">Full</option>
+        </select>
     
     </form>
 
@@ -146,6 +156,7 @@
         if (localStorage.getItem('missileSpecs')) {
             const data = JSON.parse(localStorage.getItem('missileSpecs'));
             const difficultyData = JSON.parse(localStorage.getItem('difficultyData'));
+            const miscSettings = JSON.parse(localStorage.getItem('miscSettings'));
 
             document.getElementById('irccm').value = data.irccmMode;
             document.getElementById('proxyFuse').value = data.proxyFuse;
@@ -160,6 +171,8 @@
             document.getElementById('missThreshold').value = difficultyData.missThreshold;
 
             document.getElementById('showFPS').value = localStorage.getItem('showFPS');
+
+            document.getElementById('realisticControls').value = miscSettings.controlMode;
 
 
         }
@@ -194,8 +207,14 @@
                 sightImage: sight
 
             };
-            
             localStorage.setItem('missileSpecs', JSON.stringify(data));
+
+            const miscSettings = {
+                controlMode: document.getElementById('realisticControls').value
+            }
+            localStorage.setItem('miscSettings', JSON.stringify(miscSettings));
+            
+            
 
             window.parent.postMessage("startGame");
         }
