@@ -73,6 +73,11 @@ export function init() {
     });
     terrainScene.add(decoScene);
 
+    const elements = document.querySelectorAll('.slide-fade-in');
+    elements.forEach(element => {
+        element.classList.add('start-animation');
+    });
+
 }
 
 export function initText() {

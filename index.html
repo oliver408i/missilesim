@@ -110,6 +110,38 @@
                 padding: 10px;
                 cursor: pointer;
             }
+            .slide-fade-in {
+                opacity: 0;
+                transform: translateY(-100%);
+            }
+
+            @keyframes slideInFadeIn {
+                0% {
+                    opacity: 0;
+                    transform: translateY(-100%);
+                }
+                100% {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .start-animation {
+                animation: slideInFadeIn 2s forwards;
+            }
+
+            @keyframes fadeInOnly {
+                0% {
+                    opacity: 0;
+                }
+                100% {
+                    opacity: 1;
+                }
+            }
+
+            .fade-in {
+                animation: fadeInOnly 2s forwards;
+            }
 		</style>
         <script type="importmap">
             {
@@ -124,16 +156,15 @@
 	<body>
         
         <div id="gameOver" class="info-txt">You Win!</div>
-        <div id="help" onclick="showHelp()">Help/Instructions</div>
-        <div id="startGameButton" onclick="window.frames[0].saveToLocalStorage()">Start</div>
+        <div id="help" class="slide-fade-in" onclick="showHelp()">Help/Instructions</div>
+        <div id="startGameButton" class="slide-fade-in"onclick="window.frames[0].saveToLocalStorage()">Start</div>
 
         <script src="webBasics.js"></script>
     
         
         <canvas id="3dcanvas"></canvas>
-        <canvas style="display:none" id="overlayCanvas"></canvas>
-        <div id="title">Missle Sim Game</div>
-        <iframe id="settingsPageIframe" src="settings.html"></iframe>
+        <div class="slide-fade-in"id="title">Missle Sim Game</div>
+        <iframe id="settingsPageIframe" class="slide-fade-in" src="settings.html"></iframe>
 
         <script type="module" src="./initThree.js"></script>
         <script src="./lib/THREETerrain.js" defer></script>
