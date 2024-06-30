@@ -92,6 +92,9 @@ function checkIntersections() {
 
 window.addEventListener('message', (event) => {
     if (event.data == "startGame") {
+        global.missileSpecs = JSON.parse(localStorage.getItem('missileSpecs'));
+        global.difficultyData = JSON.parse(localStorage.getItem('difficultyData'));
+        global.miscSettings = JSON.parse(localStorage.getItem('miscSettings'));
         INIT.hideMainMenu();
         INIT.initText();
         startGame();
@@ -510,9 +513,6 @@ window.addEventListener('resize', () => {
     camera.updateProjectionMatrix();
 });
 
-global.missileSpecs = JSON.parse(localStorage.getItem('missileSpecs'));
-global.difficultyData = JSON.parse(localStorage.getItem('difficultyData'));
-global.miscSettings = JSON.parse(localStorage.getItem('miscSettings'));
 
 initMainMenu();
 
