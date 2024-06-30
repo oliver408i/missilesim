@@ -154,17 +154,19 @@ function explode() {
             }
 
             
-
+            global.camera.position.add(new THREE.Vector3(0, 5, 0));
             
 
             let controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true; // Enable damping (inertia)
             controls.dampingFactor = 0.25; // Damping factor
-            controls.screenSpacePanning = false; // Disable panning
+            controls.enablePan  = false; // Disable panning
+
+            controls.autoRotate = true;
 
             controls.target.set(target.position.x, target.position.y, target.position.z);
 
-            controls.minDistance = Math.round(distance)+5;
+            controls.minDistance = Math.round(distance)+7;
             controls.maxDistance = controls.minDistance + 10;
             
             function endGameAnimation() {
