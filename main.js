@@ -12,10 +12,6 @@ import { addMarkerToSphere } from './irccm.js';
 import * as INIT from './init.js';
 import { initMainMenu } from './mainMenu.js';
 
-global.missileSpecs = JSON.parse(localStorage.getItem('missileSpecs'));
-global.difficultyData = JSON.parse(localStorage.getItem('difficultyData'));
-global.miscSettings = JSON.parse(localStorage.getItem('miscSettings'));
-
 INIT.init();
 
 const infoText = document.getElementById('info');
@@ -505,8 +501,6 @@ function startGame() {
     animate();
 }
 
-initMainMenu();
-
 window.addEventListener('resize', () => {
     const width = window.innerWidth;
     const height = window.innerHeight;
@@ -514,4 +508,12 @@ window.addEventListener('resize', () => {
     composer.setSize(width, height);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
-  });
+});
+
+global.missileSpecs = JSON.parse(localStorage.getItem('missileSpecs'));
+global.difficultyData = JSON.parse(localStorage.getItem('difficultyData'));
+global.miscSettings = JSON.parse(localStorage.getItem('miscSettings'));
+
+initMainMenu();
+
+
