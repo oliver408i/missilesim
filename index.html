@@ -142,6 +142,15 @@
             .fade-in {
                 animation: fadeInOnly 2s forwards;
             }
+            
+            #miscMainMenu {
+                position: absolute;
+                right: 10%;
+                bottom: 10%;
+                font: 10px SHP;
+                color: green;
+
+            }
 		</style>
         <script type="importmap">
             {
@@ -158,6 +167,10 @@
         <div id="gameOver" class="info-txt">You Win!</div>
         <div id="help" class="slide-fade-in" onclick="showHelp()">Help/Instructions</div>
         <div id="startGameButton" class="slide-fade-in"onclick="window.frames[0].saveToLocalStorage()">Start</div>
+
+        <div id="miscMainMenu" class="slide-fade-in">
+            <div id="jsCompat"></div>
+        </div>
 
         <script src="webBasics.js"></script>
     

@@ -144,6 +144,7 @@ function explode() {
             scene.add(line);
 
             sprite.layers.set(1); // Hide it
+            radarBox.layers.set(1);
 
             for (let i = 0; i < flares.length; i++) {
                 flares[i].mesh.layers.set(1);
@@ -270,12 +271,22 @@ function updateTargetRotation() {
     )
 }
 
+function radarUpdate() {
+    const vector = new THREE.Vector3();
+    target.getWorldPosition(vector);
+
+    vector.project(camera);
+
+    radarBox.position.set(vector.x, vector.y, -1);
+}
+
 let target;
 let distanceThreshold;
 let id;
 let targetRotation;
 let targetVelocity;
 let sprite;
+let radarBox;
 let meshNotVisibleFor = 0;
 
 function startGame() {
@@ -344,6 +355,18 @@ function startGame() {
         keyState[event.key] = false;
     }, false);
 
+    const radarBoxMaterial = new THREE.SpriteMaterial({ map:  new THREE.TextureLoader().load('assets/radarbox.png')});
+    radarBox = new THREE.Sprite(radarBoxMaterial);
+    // Position the sprite in front of the camera
+    radarBox.position.set(0, 0, -1);
+    radarBox.scale.set(0.1,0.1,0.1);
+    if (global.missileSpecs.irccmMode === "radar") {
+        radarBox.layers.set(0);
+    } else {
+        radarBox.layers.set(1);
+    }
+    camera.add(radarBox); // Add sprite to the camera
+    
     const spriteMaterial = new THREE.SpriteMaterial({ map:  new THREE.TextureLoader().load('assets/'+global.missileSpecs.sightImage+'.png')});
     sprite = new THREE.Sprite(spriteMaterial);
     // Position the sprite in front of the camera
@@ -425,6 +448,10 @@ function startGame() {
             // Check the distance to the target
             checkDistanceToTarget(deltaTime);
 
+            if (global.missileSpecs.irccmMode === 'radar') {
+                radarUpdate();
+            }
+
             
             // Randomly create flares from the target's position in clusters of 1 - flareCount
             if (Math.random() < 0.02) {
@@ -483,7 +510,7 @@ function startGame() {
                 for (let i = 0; i < objects.length; i++) {
                     const object = objects[i];
                     const distance = camera.position.distanceTo(object.position);
-                    if (distance < nearestDistance && objects[i] != sprite && objects[i] != camera && distance <= 100) {
+                    if (distance < nearestDistance && objects[i] != sprite && objects[i] != radarBox && objects[i] != camera && distance <= 100) {
                         nearestObject = object;
                         nearestDistance = distance;
                     }
