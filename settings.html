@@ -106,7 +106,7 @@
 
         <label for="distanceThreshold">Distance Threshold</label>
         <p>How close the missile needs to be to the target when it explodes to count as a hit.</p>
-        <input type="number" id="distanceThreshold" name="distanceThreshold" min="2" max="20" value="10"/>
+        <input type="number" id="distanceThreshold" name="distanceThreshold" min="1" max="20" value="10"/>
 
         <br><br>
 
@@ -183,6 +183,28 @@
         })
 
         function saveToLocalStorage() {
+            // Validate inputs
+            const inputs = [
+                document.getElementById('irccm'),
+                document.getElementById('proxyFuse'),
+                document.getElementById('proxyFuseDistance'),
+                document.getElementById('rangefinderMode'),
+                document.getElementById('sight'),
+                document.getElementById('targetDistance'),
+                document.getElementById('distanceThreshold'),
+                document.getElementById('flareChance'),
+                document.getElementById('flareCount'),
+                document.getElementById('missThreshold')
+            ];
+
+            inputs.forEach(input => {
+                if (input.value < input.min || input.value > input.max) {
+                    alert(`Invalid input: ${input.id}! Clamping to ${input.min} - ${input.max}`);
+                    input.value = Math.max(input.min, input.value);
+                    input.value = Math.min(input.max, input.value);
+                }
+            });
+
             console.log("Saving settings");
             const irccm = document.getElementById('irccm').value;
             const proxyFuse = document.getElementById('proxyFuse').value;
