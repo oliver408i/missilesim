@@ -358,9 +358,15 @@ function startAnimation() {
     function animate() {
         
         global.stats.begin();
-        renderer.render(scene, camera);
+        
         TWEEN.update();
         global.flame.update(global.clock.getElapsedTime()*5);
+
+        global.mmAnimationAngle += Math.PI/200;
+
+        global.missileModel.rotation.z = Math.sin(global.mmAnimationAngle) * Math.PI/4;
+        renderer.render(scene, camera);
+
         global.stats.end();
 
         id = requestAnimationFrame(animate);

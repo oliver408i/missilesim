@@ -29,7 +29,7 @@ export function initMainMenu() {
 
 }
 
-let angle = 0;
+global.mmAnimationAngle = 0;
 const radius = 1; // Radius of the circle
 
 function mainMenuAnimation() {
@@ -37,13 +37,13 @@ function mainMenuAnimation() {
     
     global.stats.begin();
 
-    global.camera.position.x = -5+(Math.sin(angle) * Math.PI/2)/2;
-    global.camera.position.y = 5+(Math.cos(angle) * Math.PI/2)/2;
+    global.camera.position.x = -5+(Math.sin(global.mmAnimationAngle) * Math.PI/2)/2;
+    global.camera.position.y = 5+(Math.cos(global.mmAnimationAngle) * Math.PI/2)/2;
     global.flame.update(global.clock.getElapsedTime()*5);
-    angle += Math.PI/200;
+    global.mmAnimationAngle += Math.PI/200;
 
     if (global.missileModel) {
-        global.missileModel.rotation.z = Math.sin(angle) * Math.PI/4;
+        global.missileModel.rotation.z = Math.sin(global.mmAnimationAngle) * Math.PI/4;
     }
     global.renderer.render(global.scene, global.camera);
 
