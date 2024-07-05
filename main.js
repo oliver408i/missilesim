@@ -4,6 +4,8 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
+import * as TWEEN from './lib/tween.esm.js';
+
 import { createThermalShaderMaterial } from './thermalShader.js';
 import { Flare } from './flare.js';
 import global from './variableHandler.js';
@@ -122,12 +124,19 @@ function explode() {
             const positionMarker = new THREE.Mesh(new THREE.SphereGeometry(0.1), new THREE.MeshLambertMaterial({color: 0xFFA500}));
             positionMarker.position.copy(camera.position);
             scene.add(positionMarker);
+            
+            positionMarker.layers.set(1);
 
             
             global.missileModel.position.copy(positionMarker.position);
             
             // Copy rotation data from camera to the model
             global.missileModel.rotation.copy(camera.rotation);
+
+            const offset = new THREE.Vector3(0, 0, 50);
+            offset.applyQuaternion(global.missileModel.quaternion);
+
+            global.missileModel.position.add(offset);
             
             global.missileModel.layers.set(0);
 
@@ -139,9 +148,10 @@ function explode() {
             lines.rotation.copy(target.rotation);
             scene.add(lines);
 
-            // Draw a line from the position marker to the target cube
-            const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([camera.position, target.position]), new THREE.LineBasicMaterial({ color: 0xFFA500}));
-            scene.add(line);
+            
+
+            
+
 
             sprite.layers.set(1); // Hide it
             radarBox.layers.set(1);
@@ -153,33 +163,55 @@ function explode() {
             for (let i = 0; i < outlines.length; i++) {
                 outlines[i].layers.set(1);
             }
-
-            
-            global.camera.position.add(new THREE.Vector3(0, 5, 0));
             
 
-            let controls = new OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true; // Enable damping (inertia)
-            controls.dampingFactor = 0.25; // Damping factor
-            controls.enablePan  = false; // Disable panning
+            let controls = undefined;
 
-            controls.autoRotate = true;
+            let tween = new TWEEN.Tween(global.missileModel.position)
+                .to(positionMarker.position, 2000)
+                .easing(TWEEN.Easing.Quadratic.Out)
+                .onUpdate(() => {
+                    global.camera.lookAt(global.missileModel.position);
+                    global.camera.position.copy(global.missileModel.position);
+                    global.camera.position.add(new THREE.Vector3(5, 20, -5));
+                })
+                .start();
 
-            controls.target.set(target.position.x, target.position.y, target.position.z);
+            setTimeout(() => {
+                // Draw a line from the position marker to the target cube
+                const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([positionMarker.position, target.position]), new THREE.LineBasicMaterial({ color: 0xFFA500}));
+                scene.add(line);
+                positionMarker.layers.set(0);
 
-            controls.minDistance = Math.round(distance)+10;
-            controls.maxDistance = controls.minDistance + 10;
+                controls = new OrbitControls(camera, renderer.domElement);
+                controls.enableDamping = true; // Enable damping (inertia)
+                controls.dampingFactor = 0.25; // Damping factor
+                controls.enablePan  = false; // Disable panning
+
+                controls.autoRotate = true;
+
+                controls.target = target.position;
+
+                controls.minDistance = Math.round(distance)+5;
+                controls.maxDistance = controls.minDistance + 10;
+            }, 2000);
             
-            function endGameAnimation() {
-                requestAnimationFrame(endGameAnimation);
+            function endGameAnimation(time) {
+                
                 global.stats.begin();
-                controls.update();
+
+                if (tween != undefined) {
+                    tween.update(time);
+                }
+                if (controls) { controls.update(); }
                 renderer.render(scene, camera);
 
                 global.stats.end();
+
+                requestAnimationFrame(endGameAnimation);
             }
 
-            endGameAnimation();
+            requestAnimationFrame(endGameAnimation);
         },200);
         
         
@@ -469,10 +501,14 @@ function startGame() {
 
             if (timer >= 2) {
                 updateTargetRotation();
+                new TWEEN.Tween(currentV)
+                .to(targetVelocity, 1500)
+                .easing(TWEEN.Easing.Quadratic.InOut)
+                .start();
                 timer = 0;
             }
 
-            currentV.lerp(targetVelocity, 0.4);
+            
 
             target.position.add(currentV);
             
@@ -521,6 +557,8 @@ function startGame() {
                     rangefinder.innerText = '--';
                 }
             }
+
+            TWEEN.update();
             composer.render();
 
             global.stats.end();
