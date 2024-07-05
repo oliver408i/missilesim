@@ -18,8 +18,6 @@ export function initMainMenu() {
             global.flame.position.setZ(1.6);
             global.scene.add(global.flame);
 
-            console.log(global.flame.material.uniforms);
-
             global.camera.position.set(-5,5,10);
             global.camera.lookAt(0,0,0);
             global.camera.position.setX(-10);
@@ -36,7 +34,7 @@ const radius = 1; // Radius of the circle
 
 function mainMenuAnimation() {
     
-    global.mainMenuAnimation = requestAnimationFrame(mainMenuAnimation);
+    
     global.stats.begin();
 
     global.camera.position.x = -5+(Math.sin(angle) * Math.PI/2)/2;
@@ -50,4 +48,6 @@ function mainMenuAnimation() {
     global.renderer.render(global.scene, global.camera);
 
     global.stats.end();
+
+    global.mainMenuAnimation = requestAnimationFrame(mainMenuAnimation);
 }

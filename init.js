@@ -104,8 +104,6 @@ export function initText() {
 }
 
 export function hideMainMenu() {
-    global.flame.layers.set(1);
-    global.missileModel.layers.set(1);
 
     document.getElementById('settingsPageIframe').style.display = 'none';
     document.getElementById('title').style.display = 'none';

@@ -321,16 +321,55 @@ let sprite;
 let radarBox;
 let meshNotVisibleFor = 0;
 
+
+
 function startGame() {
     
 
     // sleep 100 ms
     setTimeout(() => {
         cancelAnimationFrame(global.mainMenuAnimation);
+        startAnimation();
     }, 100);
+}
 
-    global.camera.position.set(0,0,0);
-    global.camera.rotation.set(0,0,0);
+function startAnimation() {
+
+    const delay = 2000;
+
+    new TWEEN.Tween(global.camera.position)
+        .to({ x: 0, y: 0, z: -1.5 }, delay)
+        .easing(TWEEN.Easing.Quadratic.InOut)
+        .start();
+    
+    new TWEEN.Tween(global.camera.rotation)
+        .to({ x: 0, y: 0, z: 0 }, delay)
+        .easing(TWEEN.Easing.Quadratic.InOut)
+        .start();
+
+    setTimeout(() => {
+        cancelAnimationFrame(id);
+        global.flame.layers.set(1);
+        global.missileModel.layers.set(1);
+        runGame();
+    }, delay);
+
+
+    function animate() {
+        
+        global.stats.begin();
+        renderer.render(scene, camera);
+        TWEEN.update();
+        global.flame.update(global.clock.getElapsedTime()*5);
+        global.stats.end();
+
+        id = requestAnimationFrame(animate);
+    }
+
+    animate();
+}
+
+function runGame() {
 
     const cubeGeometry = new THREE.BoxGeometry();
     const cubeMaterial = createThermalShaderMaterial(100); // Initial heat value
@@ -353,12 +392,6 @@ function startGame() {
     // Apply the random position relative to the camera's current position and orientation
     const targetPosition = new THREE.Vector3(randomX, randomY, randomZ).applyQuaternion(camera.quaternion);
     target.position.copy(camera.position.clone().add(targetPosition));
-
-
-
-
-
-    camera.position.z = 5;
 
     // For updating heat value
     let heatDirection = 0.5;
