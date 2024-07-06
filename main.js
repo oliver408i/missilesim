@@ -352,7 +352,7 @@ function startAnimation() {
         global.flame.layers.set(1);
         global.missileModel.layers.set(1);
         runGame();
-    }, delay);
+    }, delay+100);
 
 
     function animate() {
@@ -525,7 +525,7 @@ function runGame() {
 
             
             // Randomly create flares from the target's position in clusters of 1 - flareCount
-            if (Math.random() < 0.02) {
+            if (Math.random() < global.difficultyData.flareChance) {
                 const flareCountCeiling = global.difficultyData.flareCount;
                 const numFlares = Math.floor(Math.random() * flareCountCeiling) + 1;
                 for (let i = 0; i < numFlares; i++) {
