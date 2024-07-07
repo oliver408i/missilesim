@@ -47,22 +47,50 @@
         ::-webkit-scrollbar-thumb:window-inactive {
             background: rgba(255, 255, 255, 0.4);
         }
+
+        .modification-label {
+            font-weight: normal;
+            font-size: 14px;
+            color: white;
+        }
+
+        .tooltip {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            max-width: calc(100vw - 20px);
+            width: 200px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            border-radius: 5px;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .tooltip p{
+            font-size: 12px;
+        }
         
     </style>
 </head>
 <body>
     <form id="dropdownForm">
+
+        <div id="modSettings"></div>
+
         <h3>Missile Settings</h3>
-        <label for="irccm">IRCCM</label>
+        <!--<label for="irccm">IRCCM</label>
         <p>IRCCM mode. Outliner draws wireframes around flares of a certain temperature or higher. Radar will get information from the aircraft radar regarding where the target is. Note that the radar works best when the missile is directly pointing at the target.</p>
         <select id="irccm" name="irccm">
             <option value="None">None</option>
             <option value="outliner">Flare Outliner</option>
             <option value="radar">Radar</option>
         </select>
-        <br><br>
+        <br><br>-->
         
-        <label for="proxyFuse">Proxy Fuse</label>
+        <!--<label for="proxyFuse">Proxy Fuse</label>
         <p>Proxy fuse will automatically detonate the missile once it gets in a certain distance of a certain object. Auto targetting will only target the actual object. Rangefinder mode will detonate the missile when the rangefinder encounters any close object. Rangefinder mode only works if the rangefinder is in front-linear mode</p>
         <select id="proxyFuse" name="proxyFuse">
             <option value="None">Off</option>
@@ -70,9 +98,9 @@
             <option value="laser">Rangefinder</option>
         </select>
 
-        <br><br>
+        <br><br>-->
 
-        <label for="rangefinderMode">Rangefinder Mode</label>
+        <!--<label for="rangefinderMode">Rangefinder Mode</label>
         <p>The laser rangefinder will display how far away an object is. Linear mode looks for the closest object directly in front of the missile. Omnidirectional finds the closest object in all directions.</p>
         <select id="rangefinderMode" name="rangefinderMode">
             <option value="None">Off</option>
@@ -80,12 +108,12 @@
             <option value="omni">Omnidirectional</option>
         </select>
 
-        <br><br>
+        <br><br>-->
 
         
         <label for="proxyFuseDistance">Proxy Fuse Distance</label>
         <p>Distance in meters at which the missile will automatically detonate. Affects all proxy fuse modes.</p>
-        <input type="number" id="proxyFuseDistance" name="proxyFuseDistance" min="1" max="10" value="5"/>
+        <input type="number" id="proxyFuseDistance" name="proxyFuseDistance" min="1" max="20" value="5"/>
         <br><br>
 
         <label for="sight">Sight</label>
@@ -153,16 +181,85 @@
     </form>
 
     <script>
+        // Load modifications json from assets/modifications.json
+        let modifications = fetch('assets/modifications.json').then(response => response.json()).then(data => modifications = data);
+        
+        modifications.then(data => {
+            const modificationsDiv = document.createElement('div');
+            modificationsDiv.id = 'modificationsDiv';
+            modificationsDiv.className = 'settings-container';
+            modificationsDiv.innerHTML = '<h3>Modifications</h3>';
+
+            const grid = document.createElement('div');
+            grid.className = 'grid-container';
+
+            for (let modification of data) {
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.name = modification.name;
+
+                const label = document.createElement('label');
+                label.className = 'modification-label';
+                label.appendChild(document.createTextNode(modification.name));
+                
+                const tooltip = document.createElement('div');
+                tooltip.className = 'tooltip';
+                tooltip.innerText = modification.description;
+                document.body.appendChild(tooltip);
+
+                const category = document.createElement('p');
+                category.innerText = 'Category: ' + modification.category;
+                tooltip.appendChild(category);
+
+                const modifyMethod = document.createElement('p');
+                modifyMethod.innerText = 'Modify Method: ' + modification.modifyMethod;
+                tooltip.appendChild(modifyMethod);
+
+                const modifies = document.createElement('p');
+                modifies.innerText = 'Modifies: ' + JSON.stringify(modification.modifies);
+                tooltip.appendChild(modifies);
+
+                if (modification.incompatible) {
+                    const incompatible = document.createElement('p');
+                    incompatible.innerText = 'Incompatible: ' + JSON.stringify(modification.incompatible);
+                    tooltip.appendChild(incompatible);
+                }
+
+                if (modification.requires) {
+                    const requires = document.createElement('p');
+                    requires.innerText = 'Requires: ' + JSON.stringify(modification.requires);
+                    tooltip.appendChild(requires);
+                }
+                
+                
+                label.addEventListener('mouseover', (event) => {
+                    tooltip.style.display = 'block';
+                    tooltip.style.top = event.pageY + 'px';
+                    tooltip.style.left = event.pageX + 'px';
+                });
+
+                label.addEventListener('mouseout', () => {
+                    tooltip.style.display = 'none';
+                });
+
+                const gridItem = document.createElement('div');
+                gridItem.className = 'grid-item';
+                gridItem.appendChild(checkbox);
+                gridItem.appendChild(label);
+                grid.appendChild(gridItem);
+            }
+
+            modificationsDiv.appendChild(grid);
+            document.getElementById('modSettings').appendChild(modificationsDiv);
+        });
+
         // Load old settings if they exist
         if (localStorage.getItem('missileSpecs')) {
             const data = JSON.parse(localStorage.getItem('missileSpecs'));
             const difficultyData = JSON.parse(localStorage.getItem('difficultyData'));
             const miscSettings = JSON.parse(localStorage.getItem('miscSettings'));
 
-            document.getElementById('irccm').value = data.irccmMode;
-            document.getElementById('proxyFuse').value = data.proxyFuse;
             document.getElementById('proxyFuseDistance').value = data.proxyFuseDistance;
-            document.getElementById('rangefinderMode').value = data.rangefinderMode;
             document.getElementById('sight').value = data.sightImage;
 
             document.getElementById('targetDistance').value = difficultyData.targetDistance;
@@ -186,10 +283,7 @@
         function saveToLocalStorage() {
             // Validate inputs
             const inputs = [
-                document.getElementById('irccm'),
-                document.getElementById('proxyFuse'),
                 document.getElementById('proxyFuseDistance'),
-                document.getElementById('rangefinderMode'),
                 document.getElementById('sight'),
                 document.getElementById('targetDistance'),
                 document.getElementById('distanceThreshold'),
@@ -199,18 +293,16 @@
             ];
 
             inputs.forEach(input => {
-                if (input.value < input.min || input.value > input.max) {
+                if (parseInt(input.value) < parseInt(input.min) || parseInt(input.value) > parseInt(input.max)) {
                     alert(`Invalid input: ${input.id}! Clamping to ${input.min} - ${input.max}`);
+                    console.log(input.value);
                     input.value = Math.max(input.min, input.value);
                     input.value = Math.min(input.max, input.value);
                 }
             });
 
             console.log("Saving settings");
-            const irccm = document.getElementById('irccm').value;
-            const proxyFuse = document.getElementById('proxyFuse').value;
             const proxyFuseDistance = document.getElementById('proxyFuseDistance').value;
-            const rangefinderMode = document.getElementById('rangefinderMode').value;
             const sight = document.getElementById('sight').value;
 
             const difficultyData = {
@@ -222,6 +314,58 @@
             };
             localStorage.setItem('difficultyData', JSON.stringify(difficultyData));
 
+            
+
+            const miscSettings = {
+                controlMode: document.getElementById('realisticControls').value
+            }
+            localStorage.setItem('miscSettings', JSON.stringify(miscSettings));
+
+            
+            const modSelections = document.getElementById('modSettings').getElementsByTagName('input');
+            const enabledModifications = [];
+            for (const modSelection of modSelections) {
+                if (modSelection.checked) {
+                    const modData = modifications.find(mod => mod.name === modSelection.name);
+                    if (modData) {
+                        const incompatibleMods = modData.incompatible || [];
+                        const enabledIncompatibleMods = enabledModifications.filter(mod => incompatibleMods.includes(mod.name));
+                        if (enabledIncompatibleMods.length > 0) {
+                            alert(`Modification ${modSelection.name} is incompatible with ${enabledIncompatibleMods.map(mod => mod.name).join(', ')}. Please disable them before enabling this modification.`);
+                            return;
+                        }
+                        
+                        const requiredMods = modData.requires || [];
+                        const enabledRequiredMods = enabledModifications.filter(mod => requiredMods.includes(mod.name));
+                        if (enabledRequiredMods.length != requiredMods.length) {
+                            alert(`Modification ${modSelection.name} requires ${requiredMods.join(', ')} to be enabled. Please enable them before enabling this modification.`);
+                            return;
+                        }
+                        enabledModifications.push(modData);
+                    } else {
+                        alert(`Modification ${modSelection.name} not found!`);
+                        return;
+                    }
+                }
+            }
+            localStorage.setItem('enabledModifications', JSON.stringify(enabledModifications));
+            
+            let irccm = "None";
+            let proxyFuse = "None";
+            let rangefinderMode = "None";
+
+            console.log(enabledModifications);
+
+            for (const mod of enabledModifications) {
+                if (mod.modifies.irccmMode) {
+                    irccm = mod.modifies.irccmMode;
+                } else if (mod.modifies.proxyFuse) {
+                    proxyFuse = mod.modifies.proxyFuse;
+                } else if (mod.modifies.rangefinderMode) {
+                    rangefinderMode = mod.modifies.rangefinderMode;
+                }
+            }
+
             const data = {
                 irccmMode: irccm,
                 proxyFuse: proxyFuse,
@@ -231,11 +375,7 @@
 
             };
             localStorage.setItem('missileSpecs', JSON.stringify(data));
-
-            const miscSettings = {
-                controlMode: document.getElementById('realisticControls').value
-            }
-            localStorage.setItem('miscSettings', JSON.stringify(miscSettings));
+            
             
             
 

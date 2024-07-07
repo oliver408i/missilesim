@@ -1,0 +1,107 @@
+[
+    {
+        "name": "Bigger Warhead",
+        "description": "Install a larger warhead on the missile in order to increase its explosive mass and damage. The bigger warhead reduces the speed and acceleration of the missile.",
+        "category": "Warhead",
+        "modifyMethod": "add",
+        "modifies": {
+            "explosiveMass": 2,
+            "speed": -0.5,
+            "acceleration": -0.5
+        },
+        "incompatible": ["Smaller Warhead"]
+    },
+    {
+        "name": "Smaller Warhead",
+        "description": "Reduces the mass of the warhead, resulting in less damage but increases the speed and acceleration of the missile.",
+        "category": "Warhead",
+        "modifyMethod": "add",
+        "modifies": {
+            "explosiveMass": -2,
+            "speed": 0.5,
+            "acceleration": 0.5
+        },
+        "incompatible": ["Bigger Warhead"]
+    },
+    {
+        "name": "Improved Explosives",
+        "description": "New chemicals resulting in bigger explosions without increasing the mass of the warhead will replace the old ones, resulting in more damage without speed and acceleration decreases.",
+        "category": "Warhead",
+        "modifyMethod": "add",
+        "modifies": {
+            "explosiveMass": 2
+        }
+    },
+    {
+        "name": "Compressed Explosives",
+        "description": "Mechanical compression of the explosive will allow more explosive mass and damage with less speed and acceleration decreases.",
+        "category": "Warhead",
+        "modifyMethod": "add",
+        "modifies": {
+            "explosiveMass": 1,
+            "speed": -0.2,
+            "acceleration": -0.2
+        }
+    },
+    {
+        "name": "Heat Limiting",
+        "description": "Installation of a heat limiting mechanism to the missile seeker allows it to identify flares and mark them with a red outline.",
+        "category": "Seeker",
+        "modifyMethod": "set",
+        "modifies": {
+            "irccmMode": "outliner"
+        },
+        "incompatible": ["Radar Data Receiver"]
+    },
+    {
+        "name": "Radar Data Receiver",
+        "description": "Installation of a radar data receiver allows the missile seeker to gather data from the aircraft's radar on where the target is.",
+        "category": "Seeker",
+        "modifyMethod": "set",
+        "modifies": {
+            "irccmMode": "radar"
+        },
+        "incompatible": ["Heat Limiting"]
+    },
+    {
+        "name": "Laser Rangefinder",
+        "description": "Installation of a laser rangefinder allows the missile seeker to see the distance to any objects directly in front of the missile.",
+        "category": "Seeker",
+        "modifyMethod": "set",
+        "modifies": {
+            "rangefinderMode": "linear"
+        },
+        "incompatible": ["Rotating Rangefinder"]
+    },
+    {
+        "name": "Rotating Rangefinder",
+        "description": "Installation of a rotating rangefinder allows the missile seeker to see the distance to the closest objects in all directions.",
+        "category": "Seeker",
+        "modifyMethod": "set",
+        "modifies": {
+            "rangefinderMode": "omni"
+        },
+        "incompatible": ["Laser Rangefinder"]
+    },
+    {
+        "name": "Rangefinder Proxy Fuse",
+        "description": "Installation of a rangefinder proxy fuse will automatically detonate the missile once the rangefinder encounters any close object. Default distance is 5. Requires the Laser Rangefinder modification.",
+        "category": "Seeker",
+        "modifyMethod": "set",
+        "modifies": {
+            "proxyFuse": "laser"
+        },
+        "incompatible": ["Rotating Rangefinder"],
+        "requires": ["Laser Rangefinder"]
+    },
+    {
+        "name": "Smart Proxy Fuse",
+        "description": "Hardware improvements to the proxy fuse will allow it to automatically detonate the missile once the missile get within a certain distance of the target. Default distance is 5.",
+        "category": "Seeker",
+        "modifyMethod": "set",
+        "modifies": {
+            "proxyFuse": "autoTargetting"
+        },
+        "incompatible": ["Rangefinder Proxy Fuse"]
+    }
+]
