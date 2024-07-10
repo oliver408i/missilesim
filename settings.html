@@ -214,7 +214,7 @@
                 const modifyMethod = document.createElement('p');
                 modifyMethod.innerText = 'Modify Method: ' + modification.modifyMethod;
                 tooltip.appendChild(modifyMethod);
-                
+
                 if (modifications.modifies) {
                     const modifies = document.createElement('p');
                     modifies.innerText = 'Modifies: ' + JSON.stringify(modification.modifies);
@@ -372,6 +372,9 @@
 
 
             for (const mod of enabledModifications) {
+                if (!mod.modifies) {
+                    continue;
+                }
                 if (mod.modifies.irccmMode) {
                     irccm = mod.modifies.irccmMode;
                 } else if (mod.modifies.proxyFuse) {

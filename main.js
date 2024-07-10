@@ -167,7 +167,7 @@ function explode() {
 
             let controls = undefined;
 
-            let tween = new TWEEN.Tween(global.missileModel.position)
+            new TWEEN.Tween(global.missileModel.position)
                 .to(positionMarker.position, 2000)
                 .easing(TWEEN.Easing.Quadratic.Out)
                 .onUpdate(() => {
@@ -178,31 +178,79 @@ function explode() {
                 .start();
 
             setTimeout(() => {
+
+                function generateIntermediatePoints(start, end, numPoints) {
+                    const points = [];
+                    for (let i = 0; i <= numPoints; i++) {
+                        const t = i / numPoints;
+                        const x = start.x + t * (end.x - start.x);
+                        const y = start.y + t * (end.y - start.y);
+                        const z = start.z + t * (end.z - start.z);
+                        points.push(new THREE.Vector3(x, y, z));
+                    }
+                    return points;
+                }
+        
+                const points = generateIntermediatePoints(positionMarker.position, target.position, 100);
+                
                 // Draw a line from the position marker to the target cube
-                const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([positionMarker.position, target.position]), new THREE.LineBasicMaterial({ color: 0xFFA500}));
+                const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
+                const line = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: 0xFFA500}));
+                const drawRange = { count: 0 };
+                const maxCount = lineGeo.attributes.position.count;
                 scene.add(line);
+
+
                 positionMarker.layers.set(0);
 
-                controls = new OrbitControls(camera, renderer.domElement);
-                controls.enableDamping = true; // Enable damping (inertia)
-                controls.dampingFactor = 0.25; // Damping factor
-                controls.enablePan  = false; // Disable panning
+                
 
-                controls.autoRotate = true;
 
-                controls.target = target.position;
+                new TWEEN.Tween(drawRange)
+                    .to({ count: maxCount }, 2000)
+                    .onUpdate(() => {
+                        const currentCount = Math.floor(drawRange.count);
 
-                controls.minDistance = Math.round(distance)+5;
-                controls.maxDistance = controls.minDistance + 10;
+                        
+
+                        lineGeo.setDrawRange(0, Math.floor(drawRange.count));
+                        lineGeo.attributes.position.needsUpdate = true;
+                        const positions = lineGeo.attributes.position.array;
+
+                        const index = (currentCount - 1) * 3;
+                        if (index >= 0) {
+                            const endPosition = new THREE.Vector3(positions[index], positions[index + 1], positions[index + 2]);
+                            camera.position.x = endPosition.x + 5;
+                            camera.position.y = endPosition.y + 10; // Adjust this value to set the desired camera height
+                            camera.lookAt(endPosition);
+                        }
+                    })
+                    .easing(TWEEN.Easing.Quadratic.Out)
+                    .start();
+                
+                setTimeout(() => {
+                    controls = new OrbitControls(camera, renderer.domElement);
+                    controls.enableDamping = true; // Enable damping (inertia)
+                    controls.dampingFactor = 0.25; // Damping factor
+                    controls.enablePan  = false; // Disable panning
+
+                    controls.autoRotate = true;
+
+                    controls.minDistance = Math.round(distance)+5;
+                    controls.maxDistance = controls.minDistance + 10;
+
+                    controls.target = target.position;
+                }, 2000);
+                
+
+                
             }, 2000);
             
             function endGameAnimation(time) {
                 
                 global.stats.begin();
 
-                if (tween != undefined) {
-                    tween.update(time);
-                }
+                TWEEN.update(time);
                 if (controls) { controls.update(); }
                 renderer.render(scene, camera);
 
@@ -212,6 +260,8 @@ function explode() {
             }
 
             requestAnimationFrame(endGameAnimation);
+
+
         },200);
         
         
