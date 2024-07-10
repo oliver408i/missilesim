@@ -43,6 +43,14 @@
             "acceleration": -0.2
         }
     },
+
+
+    {
+        "name": "Big Seeker",
+        "description": "Installation of a larger seeker head allows additional modules to be installed on the seeker such as irccm and proxy fuse.",
+        "category": "Seeker",
+        "modifyMethod": "none"
+    },
     {
         "name": "Heat Limiting",
         "description": "Installation of a heat limiting mechanism to the missile seeker allows it to identify flares and mark them with a red outline.",
@@ -51,6 +59,7 @@
         "modifies": {
             "irccmMode": "outliner"
         },
+        "requires": ["Big Seeker"],
         "incompatible": ["Radar Data Receiver"]
     },
     {
@@ -61,6 +70,7 @@
         "modifies": {
             "irccmMode": "radar"
         },
+        "requires": ["Big Seeker"],
         "incompatible": ["Heat Limiting"]
     },
     {
@@ -71,6 +81,7 @@
         "modifies": {
             "rangefinderMode": "linear"
         },
+        "requires": ["Big Seeker"],
         "incompatible": ["Rotating Rangefinder"]
     },
     {
@@ -81,6 +92,7 @@
         "modifies": {
             "rangefinderMode": "omni"
         },
+        "requires": ["Big Seeker"],
         "incompatible": ["Laser Rangefinder"]
     },
     {
@@ -91,8 +103,8 @@
         "modifies": {
             "proxyFuse": "laser"
         },
-        "incompatible": ["Rotating Rangefinder"],
-        "requires": ["Laser Rangefinder"]
+        "requires": ["Laser Rangefinder"],
+        "incompatible": ["Rotating Rangefinder"]
     },
     {
         "name": "Smart Proxy Fuse",
@@ -102,6 +114,7 @@
         "modifies": {
             "proxyFuse": "autoTargetting"
         },
+        "requires": ["Rangefinder Proxy Fuse"],
         "incompatible": ["Rangefinder Proxy Fuse"]
     }
 ]

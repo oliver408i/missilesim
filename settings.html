@@ -214,20 +214,22 @@
                 const modifyMethod = document.createElement('p');
                 modifyMethod.innerText = 'Modify Method: ' + modification.modifyMethod;
                 tooltip.appendChild(modifyMethod);
-
-                const modifies = document.createElement('p');
-                modifies.innerText = 'Modifies: ' + JSON.stringify(modification.modifies);
-                tooltip.appendChild(modifies);
+                
+                if (modifications.modifies) {
+                    const modifies = document.createElement('p');
+                    modifies.innerText = 'Modifies: ' + JSON.stringify(modification.modifies);
+                    tooltip.appendChild(modifies);
+                }
 
                 if (modification.incompatible) {
                     const incompatible = document.createElement('p');
-                    incompatible.innerText = 'Incompatible: ' + JSON.stringify(modification.incompatible);
+                    incompatible.innerText = 'Incompatible: ' + modification.incompatible.join(', ');
                     tooltip.appendChild(incompatible);
                 }
 
                 if (modification.requires) {
                     const requires = document.createElement('p');
-                    requires.innerText = 'Requires: ' + JSON.stringify(modification.requires);
+                    requires.innerText = 'Requires: ' + modification.requires.join(', ');
                     tooltip.appendChild(requires);
                 }
                 
@@ -251,6 +253,19 @@
 
             modificationsDiv.appendChild(grid);
             document.getElementById('modSettings').appendChild(modificationsDiv);
+
+            // load old mod settings
+            const oldMods = localStorage.getItem('enabledModifications');
+            if (oldMods) {
+                const mods = JSON.parse(oldMods);
+                const checkboxGrid = document.getElementById('modificationsDiv').querySelector('.grid-container');
+
+                for (let mod of mods) {
+                    const checkbox = checkboxGrid.querySelector(`input[name="${mod}"]`);
+                    checkbox.checked = true;
+                }
+            }
+
         });
 
         // Load old settings if they exist
@@ -275,6 +290,7 @@
 
         }
 
+        
         document.getElementById('showFPS').addEventListener('change', function() {
             localStorage.setItem('showFPS', this.value);
             window.parent.postMessage("grabNewShowFPSSetting");
@@ -348,13 +364,12 @@
                     }
                 }
             }
-            localStorage.setItem('enabledModifications', JSON.stringify(enabledModifications));
+            localStorage.setItem('enabledModifications', JSON.stringify(enabledModifications.map(mod => mod.name)));
             
             let irccm = "None";
             let proxyFuse = "None";
             let rangefinderMode = "None";
 
-            console.log(enabledModifications);
 
             for (const mod of enabledModifications) {
                 if (mod.modifies.irccmMode) {
