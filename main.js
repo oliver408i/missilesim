@@ -166,6 +166,8 @@ function explode() {
             
 
             let controls = undefined;
+            let scale = 1;
+            let explodeSphere = undefined;
 
             new TWEEN.Tween(global.missileModel.position)
                 .to(positionMarker.position, 2000)
@@ -191,7 +193,7 @@ function explode() {
                     return points;
                 }
         
-                const points = generateIntermediatePoints(positionMarker.position, target.position, 100);
+                const points = generateIntermediatePoints(positionMarker.position, target.position, 2000);
                 
                 // Draw a line from the position marker to the target cube
                 const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
@@ -203,11 +205,12 @@ function explode() {
 
                 positionMarker.layers.set(0);
 
+                const lineDelay = 4000;
                 
 
 
                 new TWEEN.Tween(drawRange)
-                    .to({ count: maxCount }, 2000)
+                    .to({ count: maxCount }, lineDelay)
                     .onUpdate(() => {
                         const currentCount = Math.floor(drawRange.count);
 
@@ -225,7 +228,6 @@ function explode() {
                             camera.lookAt(endPosition);
                         }
                     })
-                    .easing(TWEEN.Easing.Quadratic.Out)
                     .start();
                 
                 setTimeout(() => {
@@ -240,7 +242,17 @@ function explode() {
                     controls.maxDistance = controls.minDistance + 10;
 
                     controls.target = target.position;
-                }, 2000);
+
+                    explodeSphere = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 32), new THREE.MeshBasicMaterial({ color: 0xffa500, transparent: true, opacity: 0.5 }));
+                    explodeSphere.position.copy(target.position);
+                    scene.add(explodeSphere);
+
+                    setTimeout(() => {
+                        explodeSphere.layers.set(1);
+                        explodeSphere = undefined;
+                    }, 2500)
+
+                }, lineDelay);
                 
 
                 
@@ -253,6 +265,14 @@ function explode() {
                 TWEEN.update(time);
                 if (controls) { controls.update(); }
                 renderer.render(scene, camera);
+
+                if (explodeSphere) { 
+
+                        
+                    if (scale >= 2) scale = 1;
+                    else if (scale >= 1) scale += 0.1;
+                    explodeSphere.scale.set(scale, scale, scale);
+                 }
 
                 global.stats.end();
 
