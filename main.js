@@ -192,6 +192,33 @@ function explode() {
                     }
                     return points;
                 }
+
+
+                function generateRandomPoints(camera, distance, degrees, numPoints) {
+                    const camPos = camera.position.clone();
+                    const camRot = new THREE.Matrix4().makeRotationFromQuaternion(camera.quaternion);
+
+                    const points = [];
+                    for (let i = 0; i < numPoints; i++) {
+                        const direction = new THREE.Vector3(THREE.MathUtils.randFloatSpread(1), THREE.MathUtils.randFloatSpread(1), THREE.MathUtils.randFloatSpread(1)).normalize();
+                        const angle = Math.acos(direction.z) * (direction.z > 0 ? -1 : 1);
+                        if (angle > Math.PI / 2 - degrees / 2) {
+                            direction.z = Math.cos(Math.PI / 2 - degrees / 2);
+                            direction.normalize();
+                        }
+                        const rotatedDirection = direction.clone().applyMatrix4(camRot);
+                        const randAngle = THREE.MathUtils.degToRad(THREE.MathUtils.randFloatSpread(degrees));
+                        const rotatedRandDirection = new THREE.Vector3().copy(rotatedDirection).applyAxisAngle(new THREE.Vector3(0, 1, 0), randAngle);
+                        const point = camPos.clone().add(rotatedRandDirection.multiplyScalar(distance));
+                        points.push(point);
+                    }
+                    return points;
+                }
+
+                const otherPoints = generateRandomPoints(camera, distance.toFixed(2), 45, 15);
+
+
+                
         
                 const points = generateIntermediatePoints(positionMarker.position, target.position, 2000);
                 
@@ -202,10 +229,27 @@ function explode() {
                 const maxCount = lineGeo.attributes.position.count;
                 scene.add(line);
 
+                const lineDelay = 4000;
+
+                otherPoints.forEach((point) => {
+                    const lineGeo = new THREE.BufferGeometry().setFromPoints(generateIntermediatePoints(positionMarker.position, point, 2000));
+                    const line = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: 0xFFA500}));
+                    const drawRange = { count: 0 };
+                    const maxCount = lineGeo.attributes.position.count;
+                    scene.add(line);
+                    
+                    new TWEEN.Tween(drawRange)
+                        .to({ count: maxCount }, lineDelay)
+                        .onUpdate(() => {
+                            lineGeo.setDrawRange(0, drawRange.count);
+                        })
+                        .start();
+                });
+                
 
                 positionMarker.layers.set(0);
 
-                const lineDelay = 4000;
+                
                 
 
 
