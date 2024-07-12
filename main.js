@@ -314,7 +314,7 @@ function explode() {
 
                         
                     if (scale >= 2) scale = 1;
-                    else if (scale >= 1) scale += 0.1;
+                    else if (scale >= 1) scale += 0.07;
                     explodeSphere.scale.set(scale, scale, scale);
                  }
 
