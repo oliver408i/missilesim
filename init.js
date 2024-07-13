@@ -4,6 +4,46 @@ import * as THREE from 'three';
 import Stats from 'stats';
 import { Terrain } from './lib/THREETerrainModule.js';
 
+var xS = 400, yS = 400;
+const size = 4092;
+
+async function generateTerrain() {
+    if (global.terrainScene) {
+        global.scene.remove(global.terrainScene);
+    }
+    let heightmap = localStorage.getItem('terrainMode');
+    if (!heightmap) {
+        localStorage.setItem('terrainMode', 'Fault');
+        heightmap = 'Fault';
+    }
+    const terrain = new Terrain({
+        easing: Terrain.Linear,
+        frequency: 3,
+        heightmap: Terrain[heightmap],
+        material: new THREE.MeshLambertMaterial({color: "#9A9A9A"}),
+        maxHeight: -50,
+        minHeight: -300,
+        steps: 1,
+        xSegments: xS,
+        xSize: size,
+        ySegments: yS,
+        ySize: size,
+    });
+    global.terrainMesh = terrain.getScene().children[0];
+    global.terrainScene = terrain.getScene();
+    global.scene.add(global.terrainScene);
+    var geo = global.terrainScene.children[0].geometry;
+    // Add randomly distributed foliage
+    const decoScene = Terrain.ScatterMeshes(geo, {
+        mesh: new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 12, 6), new THREE.MeshLambertMaterial({color: "#E8E8E8"})),
+        w: xS,
+        h: yS,
+        spread: 0.05,
+        randomness: Math.random,
+    });
+    global.terrainScene.add(decoScene);
+}
+
 async function loadMissile() {
     let object = await (new OBJLoader()).loadAsync("assets/sidewinder.obj");
     const mesh = object.children[0];
@@ -45,78 +85,15 @@ export function init() {
     loadMissile()
     
 
-    var xS = 400, yS = 400;
-    const size = 4092;
-    const terrain = new Terrain({
-        easing: Terrain.Linear,
-        frequency: 3,
-        heightmap: Terrain[heightmap],
-        material: new THREE.MeshLambertMaterial({color: "#9A9A9A"}),
-        maxHeight: -50,
-        minHeight: -300,
-        steps: 1,
-        xSegments: xS,
-        xSize: size,
-        ySegments: yS,
-        ySize: size,
-    });
+    
 
-
-
-    global.terrainMesh = terrain.getScene().children[0];
-    console.log(global.terrainMesh);
-
-    global.terrainScene = terrain.getScene();
-
-    // Assuming you already have your global scene, add the terrain to it
-    global.scene.add(global.terrainScene);
-
-    var geo = global.terrainScene.children[0].geometry;
-    // Add randomly distributed foliage
-    const decoScene = Terrain.ScatterMeshes(geo, {
-        mesh: new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 12, 6), new THREE.MeshLambertMaterial({color: "#E8E8E8"})),
-        w: xS,
-        h: yS,
-        spread: 0.02,
-        randomness: Math.random,
-    });
-    global.terrainScene.add(decoScene);
+    generateTerrain();
 
 
     addEventListener("message", (event) => {
         if (event.data == "changeTerrain") {
-            global.scene.remove(global.terrainScene);
-            heightmap = localStorage.getItem('terrainMode');
-            if (!heightmap) {
-                localStorage.setItem('terrainMode', 'Fault');
-                heightmap = 'Fault';
-            }
-            const terrain = new Terrain({
-                easing: Terrain.Linear,
-                frequency: 3,
-                heightmap: Terrain[heightmap],
-                material: new THREE.MeshLambertMaterial({color: "#9A9A9A"}),
-                maxHeight: -50,
-                minHeight: -300,
-                steps: 1,
-                xSegments: xS,
-                xSize: size,
-                ySegments: yS,
-                ySize: size,
-            });
-            global.terrainMesh = terrain.getScene().children[0];
-            global.terrainScene = terrain.getScene();
-            global.scene.add(global.terrainScene);
-            var geo = global.terrainScene.children[0].geometry;
-            // Add randomly distributed foliage
-            const decoScene = Terrain.ScatterMeshes(geo, {
-                mesh: new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 12, 6), new THREE.MeshLambertMaterial({color: "#E8E8E8"})),
-                w: xS,
-                h: yS,
-                spread: 0.02,
-                randomness: Math.random,
-            });
-            global.terrainScene.add(decoScene);
+            generateTerrain();
+            
         }
     })
 

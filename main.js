@@ -193,29 +193,33 @@ function explode() {
                     return points;
                 }
 
-
                 function generateRandomPoints(camera, distance, degrees, numPoints) {
-                    const camPos = camera.position.clone();
-                    const camRot = new THREE.Matrix4().makeRotationFromQuaternion(camera.quaternion);
-
                     const points = [];
+                    const direction = new THREE.Vector3();
+                    camera.getWorldDirection(direction);
+                    const angle = THREE.MathUtils.degToRad(degrees);
+                    const randomAngle = Math.random() * 2 * Math.PI;
+                    const randomDirection = new THREE.Vector3(
+                        Math.cos(randomAngle),
+                        0,
+                        Math.sin(randomAngle)
+                    ).applyAxisAngle(new THREE.Vector3(0, 1, 0), angle);
+                    const randomPoint = new THREE.Vector3().copy(direction).multiplyScalar(distance).add(randomDirection);
+                    camera.localToWorld(randomPoint);
                     for (let i = 0; i < numPoints; i++) {
-                        const direction = new THREE.Vector3(THREE.MathUtils.randFloatSpread(1), THREE.MathUtils.randFloatSpread(1), THREE.MathUtils.randFloatSpread(1)).normalize();
-                        const angle = Math.acos(direction.z) * (direction.z > 0 ? -1 : 1);
-                        if (angle > Math.PI / 2 - degrees / 2) {
-                            direction.z = Math.cos(Math.PI / 2 - degrees / 2);
-                            direction.normalize();
-                        }
-                        const rotatedDirection = direction.clone().applyMatrix4(camRot);
-                        const randAngle = THREE.MathUtils.degToRad(THREE.MathUtils.randFloatSpread(degrees));
-                        const rotatedRandDirection = new THREE.Vector3().copy(rotatedDirection).applyAxisAngle(new THREE.Vector3(0, 1, 0), randAngle);
-                        const point = camPos.clone().add(rotatedRandDirection.multiplyScalar(distance));
-                        points.push(point);
+                        const randomDirection = new THREE.Vector3(
+                            Math.cos(randomAngle),
+                            0,
+                            Math.sin(randomAngle)
+                        ).applyAxisAngle(new THREE.Vector3(0, 1, 0), angle);
+                        const randomPoint = new THREE.Vector3().copy(direction).multiplyScalar(distance).add(randomDirection);
+                        camera.localToWorld(randomPoint);
+                        points.push(randomPoint);
                     }
                     return points;
                 }
 
-                const otherPoints = generateRandomPoints(camera, distance.toFixed(2), 45, 15);
+                const otherPoints = generateRandomPoints(camera, distance.toFixed(2), 15, 20);
 
 
                 
@@ -669,6 +673,7 @@ function runGame() {
             for (let i = flares.length - 1; i >= 0; i--) {
                 if (!flares[i].update(deltaTime)) {
                     scene.remove(flares[i].mesh);
+                    flares[i].mesh.layers.set(1);
                     flares.splice(i, 1);
                     
                 }
