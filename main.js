@@ -229,7 +229,7 @@ function explode() {
                 const maxCount = lineGeo.attributes.position.count;
                 scene.add(line);
 
-                const lineDelay = 4000;
+                const lineDelay = 2000;
 
                 otherPoints.forEach((point) => {
                     const lineGeo = new THREE.BufferGeometry().setFromPoints(generateIntermediatePoints(positionMarker.position, point, 2000));
@@ -294,7 +294,7 @@ function explode() {
                     setTimeout(() => {
                         explodeSphere.layers.set(1);
                         explodeSphere = undefined;
-                    }, 2500)
+                    }, 3000)
 
                 }, lineDelay);
                 

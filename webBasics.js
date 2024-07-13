@@ -28,7 +28,7 @@ function supportsES6() {
 
 // Check javascript version
 if (!supportsES6()) {
-    alert("Your browser does not support ES6. This game and THREE.js requires ES6. Please upgrade your browser.");
+    alert("Your browser does not support ES6. This game and THREE.js requires ES6. Please update your browser.");
     document.getElementById('jsCompat').innerText = "ES6 Unsupported";
     document.getElementById('jsCompat').style.color = 'red';
 } else {
