@@ -52,7 +52,7 @@ export function init() {
         frequency: 3,
         heightmap: Terrain[heightmap],
         material: new THREE.MeshLambertMaterial({color: "#9A9A9A"}),
-        maxHeight: -100,
+        maxHeight: -50,
         minHeight: -300,
         steps: 1,
         xSegments: xS,
@@ -71,8 +71,6 @@ export function init() {
     // Assuming you already have your global scene, add the terrain to it
     global.scene.add(global.terrainScene);
 
-    // Optional:
-    // Get the geometry of the terrain across which you want to scatter meshes
     var geo = global.terrainScene.children[0].geometry;
     // Add randomly distributed foliage
     const decoScene = Terrain.ScatterMeshes(geo, {
@@ -98,7 +96,7 @@ export function init() {
                 frequency: 3,
                 heightmap: Terrain[heightmap],
                 material: new THREE.MeshLambertMaterial({color: "#9A9A9A"}),
-                maxHeight: -100,
+                maxHeight: -50,
                 minHeight: -300,
                 steps: 1,
                 xSegments: xS,
