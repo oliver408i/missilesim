@@ -159,6 +159,22 @@
 
         <h3>Misc Settings</h3>
 
+        <label for="terrainMode">Terrain Heightmap</label>
+        <p>Which type of terrain heightmap to use</p>
+        <select id="terrainMode" name="terrainMode">
+            <option value="Fault">Default (Fault)</option>
+            <option value="Cosine">Cosine</option>
+            <option value="DiamondSquare">Diamond-Square</option>
+            <option value="Hill">Hill</option>
+            <option value="HillIsland">Hill Island</option>
+            <option value="Particles">Particles</option>
+            <option value="Perlin">Perlin</option>
+            <option value="PerlinDiamond">Perlin Diamond</option>
+
+        </select>
+
+        <br><br>
+
         <label for="showFPS">Show FPS</label>
         <p>Show FPS in game</p>
         <select id="showFPS" name="showFPS">
@@ -290,10 +306,18 @@
 
         }
 
+        document.getElementById('showFPS').value = localStorage.getItem('showFPS');
+        document.getElementById('terrainMode').value = localStorage.getItem('terrainMode');
+
         
         document.getElementById('showFPS').addEventListener('change', function() {
             localStorage.setItem('showFPS', this.value);
             window.parent.postMessage("grabNewShowFPSSetting");
+        })
+
+        document.getElementById('terrainMode').addEventListener('change', function() {
+            localStorage.setItem('terrainMode', this.value);
+            window.parent.postMessage("changeTerrain");
         })
 
         function saveToLocalStorage() {

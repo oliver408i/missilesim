@@ -34,20 +34,26 @@ export function init() {
     } else {
         global.stats.domElement.style.display = 'none';
     }
+
+    let heightmap = localStorage.getItem('terrainMode');
+    if (!heightmap) {
+        localStorage.setItem('terrainMode', 'Fault');
+        heightmap = 'Fault';
+    }
     
 
     loadMissile()
     
 
-    var xS = 200, yS = 200;
+    var xS = 400, yS = 400;
     const size = 4092;
     const terrain = new Terrain({
         easing: Terrain.Linear,
-        frequency: 2.5,
-        heightmap: Terrain.Fault,
+        frequency: 3,
+        heightmap: Terrain[heightmap],
         material: new THREE.MeshLambertMaterial({color: "#9A9A9A"}),
         maxHeight: -100,
-        minHeight: -200,
+        minHeight: -300,
         steps: 1,
         xSegments: xS,
         xSize: size,
@@ -77,6 +83,44 @@ export function init() {
         randomness: Math.random,
     });
     global.terrainScene.add(decoScene);
+
+
+    addEventListener("message", (event) => {
+        if (event.data == "changeTerrain") {
+            global.scene.remove(global.terrainScene);
+            heightmap = localStorage.getItem('terrainMode');
+            if (!heightmap) {
+                localStorage.setItem('terrainMode', 'Fault');
+                heightmap = 'Fault';
+            }
+            const terrain = new Terrain({
+                easing: Terrain.Linear,
+                frequency: 3,
+                heightmap: Terrain[heightmap],
+                material: new THREE.MeshLambertMaterial({color: "#9A9A9A"}),
+                maxHeight: -100,
+                minHeight: -300,
+                steps: 1,
+                xSegments: xS,
+                xSize: size,
+                ySegments: yS,
+                ySize: size,
+            });
+            global.terrainMesh = terrain.getScene().children[0];
+            global.terrainScene = terrain.getScene();
+            global.scene.add(global.terrainScene);
+            var geo = global.terrainScene.children[0].geometry;
+            // Add randomly distributed foliage
+            const decoScene = Terrain.ScatterMeshes(geo, {
+                mesh: new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 12, 6), new THREE.MeshLambertMaterial({color: "#E8E8E8"})),
+                w: xS,
+                h: yS,
+                spread: 0.02,
+                randomness: Math.random,
+            });
+            global.terrainScene.add(decoScene);
+        }
+    })
 
     const elements = document.querySelectorAll('.slide-fade-in');
     elements.forEach(element => {
