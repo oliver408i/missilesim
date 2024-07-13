@@ -2,6 +2,7 @@ import global from './variableHandler.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import * as THREE from 'three';
 import Stats from 'stats';
+import { Terrain } from './lib/THREETerrainModule.js';
 
 async function loadMissile() {
     let object = await (new OBJLoader()).loadAsync("assets/sidewinder.obj");
@@ -40,10 +41,10 @@ export function init() {
 
     var xS = 200, yS = 200;
     const size = 4092;
-    const terrainScene = window.THREETerrain({
-        easing: window.THREETerrain.Linear,
+    const terrain = new Terrain({
+        easing: Terrain.Linear,
         frequency: 2.5,
-        heightmap: window.THREETerrain.Fault,
+        heightmap: Terrain.Fault,
         material: new THREE.MeshLambertMaterial({color: "#9A9A9A"}),
         maxHeight: -100,
         minHeight: -200,
@@ -54,24 +55,28 @@ export function init() {
         ySize: size,
     });
 
-    global.terrainMesh = terrainScene.children[0];
+
+
+    global.terrainMesh = terrain.getScene().children[0];
     console.log(global.terrainMesh);
 
+    global.terrainScene = terrain.getScene();
+
     // Assuming you already have your global scene, add the terrain to it
-    global.scene.add(terrainScene);
+    global.scene.add(global.terrainScene);
 
     // Optional:
     // Get the geometry of the terrain across which you want to scatter meshes
-    var geo = terrainScene.children[0].geometry;
+    var geo = global.terrainScene.children[0].geometry;
     // Add randomly distributed foliage
-    const decoScene = window.THREETerrain.ScatterMeshes(geo, {
+    const decoScene = Terrain.ScatterMeshes(geo, {
         mesh: new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 12, 6), new THREE.MeshLambertMaterial({color: "#E8E8E8"})),
         w: xS,
         h: yS,
         spread: 0.02,
         randomness: Math.random,
     });
-    terrainScene.add(decoScene);
+    global.terrainScene.add(decoScene);
 
     const elements = document.querySelectorAll('.slide-fade-in');
     elements.forEach(element => {
