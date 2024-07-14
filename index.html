@@ -142,6 +142,20 @@
             .fade-in {
                 animation: fadeInOnly 2s forwards;
             }
+
+            @keyframes fadeOut {
+                0% {
+                    opacity: 1;
+                }
+                100% {
+                    opacity: 0;
+                    display: none;
+                }
+            }
+
+            .fade-out {
+                animation: fadeOut 1s forwards;
+            }
             
             #miscMainMenu {
                 position: absolute;

@@ -72,7 +72,7 @@ export function init() {
     if (showFPS != "None") {
         global.stats.showPanel(parseInt(showFPS));
     } else {
-        global.stats.domElement.style.display = 'none';
+        global.stats.domElement.classList.add('fade-out');
     }
 
     let heightmap = localStorage.getItem('terrainMode');
@@ -129,9 +129,9 @@ export function initText() {
 
 export function hideMainMenu() {
 
-    document.getElementById('settingsPageIframe').style.display = 'none';
-    document.getElementById('title').style.display = 'none';
-    document.getElementById('startGameButton').style.display = 'none';
-    document.getElementById('help').style.display = 'none';
-    document.getElementById('miscMainMenu').style.display = 'none';
+    document.getElementById('settingsPageIframe').classList.add('fade-out');
+    document.getElementById('title').classList.add('fade-out');
+    document.getElementById('startGameButton').classList.add('fade-out');
+    document.getElementById('help').classList.add('fade-out');
+    document.getElementById('miscMainMenu').classList.add('fade-out');
 }

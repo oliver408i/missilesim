@@ -7,6 +7,4 @@ WASD for turning, Space to detonate (proxy fuse will auto detonate), don't go fo
 
 TODO:
 - Retry logic after miss
-- Better hit animation (perhaps like WT?)
-- Interpolate camera to missile at beginning
 - Fade out menu at beginning
