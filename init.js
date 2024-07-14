@@ -10,6 +10,8 @@ const size = 4092;
 async function generateTerrain() {
     if (global.terrainScene) {
         global.scene.remove(global.terrainScene);
+        global.terrainMesh.geometry.dispose();
+        global.terrainMesh.material.dispose();
     }
     let heightmap = localStorage.getItem('terrainMode');
     if (!heightmap) {
