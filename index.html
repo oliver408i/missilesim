@@ -110,10 +110,9 @@
                 padding: 10px;
                 cursor: pointer;
             }
-            .slide-fade-in {
-                opacity: 0;
-                transform: translateY(-100%);
-            }
+
+            /* slide in fade in */
+            /* chat gpt is on crack or something */
 
             @keyframes slideInFadeIn {
                 0% {
@@ -126,9 +125,13 @@
                 }
             }
 
-            .start-animation {
+            .slide-in-fade-in {
                 animation: slideInFadeIn 1s forwards;
             }
+
+            /*** ***/
+
+            /* fade in */
 
             @keyframes fadeInOnly {
                 0% {
@@ -143,6 +146,10 @@
                 animation: fadeInOnly 2s forwards;
             }
 
+            /*** ***/
+
+            /* fade out */
+
             @keyframes fadeOut {
                 0% {
                     opacity: 1;
@@ -156,6 +163,8 @@
             .fade-out {
                 animation: fadeOut 1s forwards;
             }
+
+            /*** ok ***/
             
             #miscMainMenu {
                 position: absolute;
@@ -164,6 +173,10 @@
                 font: 10px SHP;
                 color: green;
 
+            }
+
+            .hide {
+                display: none;
             }
 		</style>
         <script type="importmap">
@@ -179,10 +192,10 @@
 	<body>
         
         <div id="gameOver" class="info-txt">You Win!</div>
-        <div id="help" class="slide-fade-in" onclick="showHelp()">Help/Instructions</div>
-        <div id="startGameButton" class="slide-fade-in"onclick="window.frames[0].saveToLocalStorage()">Start</div>
+        <div id="help" class = "hide" onclick="showHelp()">Help/Instructions</div>
+        <div id="startGameButton" class = "hide" onclick="window.frames[0].saveToLocalStorage()">Start</div>
 
-        <div id="miscMainMenu" class="slide-fade-in">
+        <div id="miscMainMenu" class = "hide">
             <div id="jsCompat"></div>
         </div>
 
@@ -190,8 +203,21 @@
     
         
         <canvas id="3dcanvas"></canvas>
-        <div class="slide-fade-in"id="title">Missle Sim Game</div>
-        <iframe id="settingsPageIframe" class="slide-fade-in" src="settings.html"></iframe>
+        <div id="title" class = "hide">Missle Sim Game</div>
+        <iframe id="settingsPageIframe" class = "hide" src="settings.html"></iframe>
+
+        <!--
+        stuff that needs slide in fade in class after js starts loading
+        so it doesn't pop up like a jumpscare out of the loading screen
+        for the js remove .hide and add .slide-in-fade-in
+
+        id - title
+           - settingsPageIframe
+           - miscMainMenu
+           - help
+           - startGameButton
+        
+        -->
 
         <!--<script type="module" src="./initThree.js"></script>
         <script src="./lib/THREETerrain.js" defer></script>

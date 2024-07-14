@@ -97,9 +97,10 @@ export function init() {
         }
     })
 
-    const elements = document.querySelectorAll('.slide-fade-in');
+    const elements = document.querySelectorAll('.hide');
     elements.forEach(element => {
-        element.classList.add('start-animation');
+        element.classList.remove('hide');
+        element.classList.add('slide-in-fade-in');
     });
 
 }
