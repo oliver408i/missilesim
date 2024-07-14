@@ -658,9 +658,10 @@ function runGame() {
 
             if (timer >= 2) {
                 updateTargetRotation();
+                TWEEN.removeAll();
                 new TWEEN.Tween(currentV)
                 .to(targetVelocity, 1500)
-                .easing(TWEEN.Easing.Quadratic.InOut)
+                .easing(TWEEN.Easing.Linear.InOut)
                 .start();
                 timer = 0;
             }
@@ -673,7 +674,8 @@ function runGame() {
             for (let i = flares.length - 1; i >= 0; i--) {
                 if (!flares[i].update(deltaTime)) {
                     scene.remove(flares[i].mesh);
-                    flares[i].mesh.layers.set(1);
+                    flares[i].mesh.geometry.dispose();
+                    flares[i].mesh.material.dispose();
                     flares.splice(i, 1);
                     
                 }
@@ -686,6 +688,8 @@ function runGame() {
 
                     }
                     if (!flares.includes(outlines[i].userData.trackedFlare)) {
+                        outlines[i].geometry.dispose();
+                        outlines[i].material.dispose();
                         scene.remove(outlines[i]);
                         outlines.splice(i, 1);
                     }   

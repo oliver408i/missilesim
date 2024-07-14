@@ -135,4 +135,6 @@ export function hideMainMenu() {
     document.getElementById('startGameButton').classList.add('fade-out');
     document.getElementById('help').classList.add('fade-out');
     document.getElementById('miscMainMenu').classList.add('fade-out');
+
+    document.getElementById('startGameButton').onclick = () => {};
 }
