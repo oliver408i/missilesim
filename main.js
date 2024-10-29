@@ -11,6 +11,8 @@ import { Flare } from './flare.js';
 import global from './variableHandler.js';
 import { addMarkerToSphere } from './irccm.js';
 
+import { startMp } from "./multiplayer.js";
+
 import * as INIT from './init.js';
 import { initMainMenu } from './mainMenu.js';
 
@@ -50,6 +52,8 @@ const composer = new EffectComposer(renderer);
 
 composer.addPass(renderPass);
 composer.addPass(defaultBloomPass);
+
+global.composer = composer;
 
 const flares = [];
 const outlines = [];
@@ -108,6 +112,9 @@ window.addEventListener('message', (event) => {
         } else {
             global.stats.domElement.style.display = 'none';
         }
+    } else if (event.data == "startMp") {
+        INIT.hideMainMenu();
+        startMp();
     }
 })
 

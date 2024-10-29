@@ -101,6 +101,16 @@
                 padding: 10px;
                 cursor: pointer; 
             }
+
+            #mpButton {
+                position:absolute;
+                left: 10%;
+                bottom: 5%;
+                font: 20px SHP;
+                color: green;
+                padding: 10px;
+                cursor: pointer; 
+            }
             #help {
                 position:absolute;
                 right: 10%;
@@ -194,6 +204,9 @@
         <div id="gameOver" class="info-txt">You Win!</div>
         <div id="help" class = "hide" onclick="showHelp()">Help/Instructions</div>
         <div id="startGameButton" class = "hide" onclick="window.frames[0].saveToLocalStorage()">Start</div>
+        <div id="mpButton" class = "hide" onclick="window.frames[0].sendStartMp()">[DEV] Multiplayer</div>
+
+
 
         <div id="miscMainMenu" class = "hide">
             <div id="jsCompat"></div>

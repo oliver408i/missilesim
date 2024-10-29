@@ -2,12 +2,15 @@ import global from './variableHandler.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import * as THREE from 'three';
 import Stats from 'stats';
-import { Terrain } from './lib/THREETerrainModule.js';
+import { Terrain, seed } from './lib/THREETerrainModule.js';
 
 var xS = 400, yS = 400;
 const size = 4092;
 
 async function generateTerrain() {
+    const xseed = Math.random();
+    seed(xseed);
+    global.seed = xseed;
     if (global.terrainScene) {
         global.scene.remove(global.terrainScene);
         global.terrainMesh.geometry.dispose();
@@ -18,13 +21,14 @@ async function generateTerrain() {
         localStorage.setItem('terrainMode', 'Fault');
         heightmap = 'Fault';
     }
+    global.hmap = heightmap;
     const terrain = new Terrain({
         easing: Terrain.Linear,
         frequency: 3,
         heightmap: Terrain[heightmap],
         material: new THREE.MeshLambertMaterial({color: "#9A9A9A"}),
-        maxHeight: -50,
-        minHeight: -300,
+        maxHeight: -10,
+        minHeight: -200,
         steps: 1,
         xSegments: xS,
         xSize: size,
@@ -40,7 +44,7 @@ async function generateTerrain() {
         mesh: new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 12, 6), new THREE.MeshLambertMaterial({color: "#E8E8E8"})),
         w: xS,
         h: yS,
-        spread: 0.05,
+        spread: 0.005,
         randomness: Math.random,
     });
     global.terrainScene.add(decoScene);
@@ -135,8 +139,12 @@ export function hideMainMenu() {
     document.getElementById('settingsPageIframe').classList.add('fade-out');
     document.getElementById('title').classList.add('fade-out');
     document.getElementById('startGameButton').classList.add('fade-out');
+    document.getElementById('mpButton').classList.add('fade-out');
+
     document.getElementById('help').classList.add('fade-out');
     document.getElementById('miscMainMenu').classList.add('fade-out');
 
     document.getElementById('startGameButton').onclick = () => {};
+    document.getElementById('mpButton').onclick = () => {};
+
 }
