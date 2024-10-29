@@ -4,3 +4,4 @@ server_old
 server_new/env
 env
 sharedLib
+server_new/__pycache__
