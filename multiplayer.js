@@ -152,6 +152,7 @@ export function startMp() {
     let projectiles = {};
     let playerModels = {};
     let projectileModels = {};
+    let debugModels = {};
 
     const healthText = document.createElement('div');
     healthText.style.position = 'absolute';
@@ -252,6 +253,8 @@ export function startMp() {
     }, false);
 
     global.camera.position.set(player.position.clone());
+
+    const missileCam = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
     let targetRotationX = 0;
     let targetRotationY = 0;
@@ -524,15 +527,38 @@ export function startMp() {
             return;
         }
 
+        let closestMissile = {'id': null, 'distance': Infinity};
+
         for (const i in projectiles) {
             if (projectiles[i]['_type'] == 'missile') {
+                const dist = global.camera.position.distanceTo(projectileModels[i].position);
+                if (keyState['b'] && projectiles[i]['owner'] == uuid) {
+                    if (closestMissile['distance'] > dist) {
+                        closestMissile = {'id': i, 'distance': dist};
+                    }
+                }
+                const forward = new THREE.Vector3(0, 0, 1);
+                const rotation = new THREE.Euler(0, 0, projectileModels[i].rotation.z);
+                const direction = forward.clone().applyEuler(rotation);
+
+                if (debugModels[i] == null) {
+                    debugModels[i] = new THREE.ArrowHelper(direction, projectileModels[i].position, 100, 0xff0000, 2, 2);
+                    global.scene.add(debugModels[i]);
+                } else { 
+                    debugModels[i].setDirection(direction);
+                    debugModels[i].position.set(projectileModels[i].position)
+                }
+
+                
+                
+
                 const marker = document.getElementById(i);
-                if (!isMeshVisible(global.camera, projectileModels[i])) {
+                if (!isMeshVisible(global.camera, projectileModels[i]) || (keyState['b'] && closestMissile['id'] == i)) {
                     marker.style.display = 'none';
                     continue;
                 }
-                const dist = global.camera.position.distanceTo(projectileModels[i].position);
-                if (dist > 100) {
+                
+                if (dist > 200) {
                     marker.style.display = 'none';
                     continue;
                 }
@@ -553,7 +579,29 @@ export function startMp() {
             }
         }
 
-        global.composer.render();
+        if (closestMissile['id'] != null && keyState['b']) {
+            const direction = new THREE.Vector3();
+            const missilePosition = projectileModels[closestMissile['id']].position;
+            const target = playerModels[projectiles[closestMissile['id']]['target']].position;
+
+            // Compute the direction from the missile to the target
+            direction.subVectors(target, missilePosition);
+            direction.normalize();
+
+            // Offset the camera position to be 5 units behind the missile, along the direction to the target
+            const cameraDistance = 5;
+            missileCam.position.copy(missilePosition).sub(direction.multiplyScalar(cameraDistance));
+
+            // Set the camera to look directly at the target
+            missileCam.lookAt(target);
+
+            // Update camera matrices and render
+            missileCam.updateMatrixWorld();
+            missileCam.updateProjectionMatrix();
+            global.renderer.render(global.scene, missileCam);
+        } else {
+            global.composer.render();
+        }
 
         global.stats.end();
 

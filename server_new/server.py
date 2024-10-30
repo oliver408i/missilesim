@@ -1,5 +1,20 @@
 import bottle, json, uuid, random, threading, time, math, three # type: ignore
 import bottle.ext.websocket as websocket # type: ignore
+import numpy as np, types
+
+def convert_to_serializable(data):
+    """Recursively converts numpy arrays and generators to JSON-serializable formats."""
+    if isinstance(data, np.ndarray):
+        return data.tolist()
+    elif isinstance(data, dict):
+        return {key: convert_to_serializable(value) for key, value in data.items()}
+    elif isinstance(data, list):
+        return [convert_to_serializable(element) for element in data]
+    elif isinstance(data, tuple):
+        return tuple(convert_to_serializable(element) for element in data)
+    elif isinstance(data, types.GeneratorType):
+        return list(data)  # Convert generator to list
+    return data  # Return data as is if it's already serializable
 
 app = bottle.Bottle()
 
@@ -54,7 +69,10 @@ def tick(players, projectiles):
                     break
                 targetCoords = players[projectiles[i]['target']]['location']
 
-                projectiles[i] = three.update_projectile(projectiles[i], targetCoords, 0.2, 0.2, 1)
+                lifetime = projectiles[i]['lifetime']
+                speed = 1 - 0.1 * math.sin(lifetime / 5000 * math.pi / 2)
+
+                projectiles[i] = three.update_projectile(projectiles[i], targetCoords, 0.01,speed, 1)
 
                 for playerId, player in list(players.items()):  # Iterate over a copy of players to safely modify it
                     player_pos = player['location']
@@ -106,7 +124,7 @@ def websocket_app(ws):
                 return
             thisId = str(uuid.uuid4())
             print("client joined", thisId)
-            players[thisId] = {'id': thisId, 'name': data['name'], 'location': [0, 0, 0], 'rotation': [0, 0, 0], 'moveSpeed': random.randint(1, 20) * 0.01, 'health':100, 'fireCooldown': FIRE_COOLDOWN}
+            players[thisId] = {'id': thisId, 'name': data['name'], 'location': [0, 0, 0], 'rotation': [0, 0, 0], 'moveSpeed': random.randint(1, 20) * 0.04, 'health':100, 'fireCooldown': FIRE_COOLDOWN}
 
             if terrainData == []:
                 print("using terrain data from this client", data['terrainType'], data['terrainSeed'])
@@ -161,7 +179,7 @@ def websocket_app(ws):
                 players[thisId]['rotation'] = data['rotation']
         
         elif data['_type'] == "update":
-            ws.send(json.dumps({'_type': 'update', 'players': players, 'projectiles': projectiles}))
+            ws.send(json.dumps(convert_to_serializable({'_type': 'update', 'players': players, 'projectiles': projectiles})))
 
     if thisId in players:
         del players[thisId]
