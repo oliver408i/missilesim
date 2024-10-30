@@ -51,14 +51,10 @@ def tick(players, projectiles):
                 if not projectiles[i]['target'] in players: 
                     print("target", projectiles[i]['target'], "not found")
                     del projectiles[i]
+                    break
                 targetCoords = players[projectiles[i]['target']]['location']
 
-                direction = [(targetCoords[0] - projectiles[i]['location'][0]), (targetCoords[1] - projectiles[i]['location'][1]), (targetCoords[2] - projectiles[i]['location'][2])]
-                length = math.sqrt(sum(x**2 for x in direction))
-                direction = [x/length for x in direction]
-                projectiles[i]['location'][0] += direction[0] * 1
-                projectiles[i]['location'][1] += direction[1] * 1
-                projectiles[i]['location'][2] += direction[2] * 1
+                projectiles[i] = three.update_projectile(projectiles[i], targetCoords, 10, 20, 0.01)
 
                 for playerId, player in list(players.items()):  # Iterate over a copy of players to safely modify it
                     player_pos = player['location']

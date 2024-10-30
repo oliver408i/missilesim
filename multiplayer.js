@@ -401,11 +401,12 @@ export function startMp() {
                 if (targetId == null) {
                     return;
                 }
+                const rotData = [global.camera.quaternion.x, global.camera.quaternion.y, global.camera.quaternion.z, global.camera.quaternion.w];
                 socket.send(JSON.stringify({
                     '_type': 'missileLaunch',
                     'target': targetId,
                     'location': [global.camera.position.x, global.camera.position.y, global.camera.position.z],
-                    'rotation': [global.camera.rotation.x, global.camera.rotation.y, global.camera.rotation.z]
+                    'rotation': rotData
                 }))
                 seekerTarget = null;
                 seekerOn = false;
