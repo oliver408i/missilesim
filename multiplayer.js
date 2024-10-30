@@ -88,6 +88,9 @@ export function startMp() {
         deadText.style.fontFamily = 'SHP';
         deadText.textContent = 'You died!';
         document.body.appendChild(deadText);
+        
+        seekerRingInner.style.display = 'none';
+        seekerRingOuter.style.display = 'none';
     
         cancelAnimationFrame(id);
     
@@ -197,8 +200,16 @@ export function startMp() {
                 projectiles = data['projectiles'];
                 if (id == null && uuid != null) {
                     console.log("Starting game loop. User "+uuid)
+            
+                    global.socket.send(JSON.stringify({
+                        "_type": "messages"
+                    }))
                     id = requestAnimationFrame(animate);
                 }
+
+                global.socket.send(JSON.stringify({
+                    '_type': 'update',
+                }))
             }
             
         }
@@ -208,7 +219,9 @@ export function startMp() {
                 messageText.classList.remove('messages-fade-out');
                 messageText.classList.add('messages-fade-out');
             }
-            
+            global.socket.send(JSON.stringify({
+                "_type": "messages"
+            }))
         }
     }
 
@@ -228,6 +241,7 @@ export function startMp() {
     global.scene.add(player);
 
     const keyState = {};
+    let lastKeyState = {};
 
     document.addEventListener('keydown', (event) => {
         keyState[event.key] = true;
@@ -247,13 +261,6 @@ export function startMp() {
 
     function animate() {
         global.stats.begin();
-        global.socket.send(JSON.stringify({
-            '_type': 'update',
-        }));
-
-        global.socket.send(JSON.stringify({
-            "_type": "messages"
-        }))
 
         if (keyState['w']) {
             if (global.miscSettings.controlMode == "2") {
@@ -310,6 +317,12 @@ export function startMp() {
                 projectileModels[projectile["id"]] = new THREE.Mesh(bulletGeometry, bulletMaterial);
                 projectileModels[projectile["id"]].position.set(projectile["location"][0], projectile["location"][1], projectile["location"][2]);
                 projectileModels[projectile["id"]].rotation.set(projectile["rotation"][0], projectile["rotation"][1], projectile["rotation"][2]);
+                const marker = document.createElement('div');
+                marker.className = 'marker';
+                marker.id = projectile["id"];
+                marker.style.display = 'none';
+                marker.style.zIndex = '1';
+                document.body.appendChild(marker);
                 global.scene.add(projectileModels[projectile["id"]]);
             } else {
                 projectileModels[projectile["id"]].position.set(projectile["location"][0], projectile["location"][1], projectile["location"][2]);
@@ -320,6 +333,7 @@ export function startMp() {
         for (let projectile in projectileModels) {
             if (!projectiles[projectile]) {
                 global.scene.remove(projectileModels[projectile]);
+                document.getElementById(projectile).remove();
                 projectileModels[projectile].geometry.dispose();
                 projectileModels[projectile].material.dispose();
                 delete projectileModels[projectile];
@@ -368,7 +382,8 @@ export function startMp() {
                 }));
             }
 
-            if (keyState['x']) {
+            if (keyState['x'] && !lastKeyState['x']) {
+                lastKeyState['x'] = true;
                 if (!seekerOn) {
                     seekerRingOuter.style.display = 'block';
                     seekerRingOuter.classList.add('flash');
@@ -388,9 +403,12 @@ export function startMp() {
 
                     seekerOn = false;
                 }
+            } else if (!keyState['x']) {
+                lastKeyState['x'] = false;
             }
 
-            if (keyState['v'] && seekerTarget != null) {
+            if (keyState['v'] && !lastKeyState['v'] && seekerTarget != null) {
+                lastKeyState['v'] = true;
                 let targetId = null;
                 for (let [key, value] of Object.entries(playerModels)) {
                     if (value === seekerTarget) {
@@ -401,22 +419,28 @@ export function startMp() {
                 if (targetId == null) {
                     return;
                 }
-                const rotData = [global.camera.quaternion.x, global.camera.quaternion.y, global.camera.quaternion.z, global.camera.quaternion.w];
-                socket.send(JSON.stringify({
-                    '_type': 'missileLaunch',
-                    'target': targetId,
-                    'location': [global.camera.position.x, global.camera.position.y, global.camera.position.z],
-                    'rotation': rotData
-                }))
-                seekerTarget = null;
-                seekerOn = false;
+                if (players[targetId] == null) {
+                    console.log("Invalid target?")
+                } else {
+                    const rotData = [global.camera.quaternion.x, global.camera.quaternion.y, global.camera.quaternion.z, global.camera.quaternion.w];
+                    socket.send(JSON.stringify({
+                        '_type': 'missileLaunch',
+                        'target': targetId,
+                        'location': [global.camera.position.x, global.camera.position.y, global.camera.position.z],
+                        'rotation': rotData
+                    }))
+                    seekerTarget = null;
+                    seekerOn = false;
 
-                seekerRingInner.style.display = 'none';
-                seekerRingOuter.style.display = 'none';
+                    seekerRingInner.style.display = 'none';
+                    seekerRingOuter.style.display = 'none';
 
 
-                seekerRingInner.classList.remove("green-outline");
-                seekerRingOuter.classList.remove("green-outline");
+                    seekerRingInner.classList.remove("green-outline");
+                    seekerRingOuter.classList.remove("green-outline");
+                }
+            } else if (!keyState['v']) {
+                lastKeyState['v'] = false;
             }
 
             if (seekerOn) {
@@ -424,8 +448,8 @@ export function startMp() {
                 raycaster.set(global.camera.position, cameraDirection);
                 if (seekerTarget == null) {
                     closeObjects = [];
-                    for (const i in playerModels) {
-                        if (i != uuid) {
+                    for (const i in players) {
+                        if (players[i]['id'] != uuid) {
                             const mesh = playerModels[i];
                             const closestPointOnRay = new THREE.Vector3();
                             raycaster.ray.closestPointToPoint(mesh.position, closestPointOnRay);
@@ -500,9 +524,36 @@ export function startMp() {
             return;
         }
 
-        global.composer.render();
+        for (const i in projectiles) {
+            if (projectiles[i]['_type'] == 'missile') {
+                const marker = document.getElementById(i);
+                if (!isMeshVisible(global.camera, projectileModels[i])) {
+                    marker.style.display = 'none';
+                    continue;
+                }
+                const dist = global.camera.position.distanceTo(projectileModels[i].position);
+                if (dist > 100) {
+                    marker.style.display = 'none';
+                    continue;
+                }
+                const vector = new THREE.Vector3();
+                projectileModels[i].getWorldPosition(vector);
+                vector.project(global.camera);
 
-        global.renderer.render(global.scene, global.camera);
+                const x = (vector.x * 0.5 + 0.5) * global.renderer.domElement.clientWidth;
+                const y = (1 - (vector.y * 0.5 + 0.5)) * global.renderer.domElement.clientHeight;
+                
+                marker.style.left = `${x}px`;
+                marker.style.top = `${y}px`;
+                marker.style.display = 'block';
+                if (projectiles[i]['owner'] == uuid) {
+                    marker.style.borderColor = 'blue';
+                }
+                marker.textContent = ''+Math.round(dist);
+            }
+        }
+
+        global.composer.render();
 
         global.stats.end();
 

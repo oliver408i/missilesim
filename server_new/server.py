@@ -54,7 +54,7 @@ def tick(players, projectiles):
                     break
                 targetCoords = players[projectiles[i]['target']]['location']
 
-                projectiles[i] = three.update_projectile(projectiles[i], targetCoords, 10, 20, 0.01)
+                projectiles[i] = three.update_projectile(projectiles[i], targetCoords, 0.2, 0.2, 1)
 
                 for playerId, player in list(players.items()):  # Iterate over a copy of players to safely modify it
                     player_pos = player['location']
