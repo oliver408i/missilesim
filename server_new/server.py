@@ -1,11 +1,12 @@
-import bottle, json, uuid, random, threading, time, math
-import bottle.ext.websocket as websocket
+import bottle, json, uuid, random, threading, time, math, three # type: ignore
+import bottle.ext.websocket as websocket # type: ignore
 
 app = bottle.Bottle()
 
 players = {}
 projectiles = {}
 terrainData = []
+messages = []
 
 def tick(players, projectiles):
     while True:
@@ -17,10 +18,12 @@ def tick(players, projectiles):
                 projectiles[i]['location'][1] += projectiles[i]['velocity'][1]
                 projectiles[i]['location'][2] += projectiles[i]['velocity'][2]
                 projectiles[i]['lifetime'] -= 1
+
                 # Check for collisions between players and projectiles
-                for playerId, player in players.items():
+                for playerId, player in list(players.items()):  # Iterate over a copy of players to safely modify it
                     player_pos = player['location']
-                    for projId, projectile in list(projectiles.items()):
+                    for projId in list(projectiles.keys()):  # Use list(projectiles.keys()) to iterate over a copy of the keys
+                        projectile = projectiles[projId]
                         proj_pos = projectile['location']
                         # Simple collision detection: check if the projectile is within 1 unit of the player
                         if (player['id'] != projectile['owner'] and
@@ -29,16 +32,61 @@ def tick(players, projectiles):
                             abs(player_pos[2] - proj_pos[2]) <= 1):
                             # Handle collision
                             dist = math.sqrt(sum((a - b) ** 2 for a, b in zip(player_pos, proj_pos)))
-                            player['health'] -= max(5, int(40 - dist))
+                            dmg = max(1, int(10 - dist))
+                            player['health'] -= dmg
                             del projectiles[projId]  # Remove projectile after collision
-                            continue
+                            if player['health'] <= 0 and not 'dead' in player:
+                                player['health'] = 0  # Prevent negative health
+                                player['dead'] = True
+                                messages.append({"for": projectile["owner"], "message": "Kill "+player['name'], "persistent": True})
+
+                                print("kill by", projectile['owner'])
+                            if dmg < 10:
+                                messages.append({"for": projectile['owner'], "message": "Hit "+player['name'] +" for "+str(dmg)})
+                            elif dmg < 20:
+                                messages.append({"for": projectile['owner'], "message": "Critical hit "+player['name'] +" for "+str(dmg)})
+                            break
+            elif projectiles[i]['_type'] == 'missile':
+                projectiles[i]['lifetime'] -= 1
+                if not projectiles[i]['target'] in players: 
+                    print("target", projectiles[i]['target'], "not found")
+                    del projectiles[i]
+                targetCoords = players[projectiles[i]['target']]['location']
+
+                direction = [(targetCoords[0] - projectiles[i]['location'][0]), (targetCoords[1] - projectiles[i]['location'][1]), (targetCoords[2] - projectiles[i]['location'][2])]
+                length = math.sqrt(sum(x**2 for x in direction))
+                direction = [x/length for x in direction]
+                projectiles[i]['location'][0] += direction[0] * 1
+                projectiles[i]['location'][1] += direction[1] * 1
+                projectiles[i]['location'][2] += direction[2] * 1
+
+                for playerId, player in list(players.items()):  # Iterate over a copy of players to safely modify it
+                    player_pos = player['location']
+                    if (player['id'] != projectiles[i]['owner'] and
+                        abs(player_pos[0] - projectiles[i]['location'][0]) <= 4 and
+                        abs(player_pos[1] - projectiles[i]['location'][1]) <= 4 and
+                        abs(player_pos[2] - projectiles[i]['location'][2]) <= 4):
+                        
+                        player['health'] = 0
+                        player['dead'] = True
+                        messages.append({"for": projectiles[i]['owner'], "message": "Missile kill "+player['name'], "persistent": True})
+                        print("missile kill by", projectiles[i]['owner'])
+                        del projectiles[i]
+                        break
+
+                if not i in projectiles: continue
                 if projectiles[i]['lifetime'] < 0:
                     del projectiles[i]
+        
+        for i in players:
+            if players[i]['fireCooldown'] > 0:
+                players[i]['fireCooldown'] -= 1
         time.sleep(0.01)
 
 gameThread = threading.Thread(target=tick, daemon=True, args=(players, projectiles))
 gameThread.start()
 
+FIRE_COOLDOWN = 20
 
 
 @app.route('/ws', apply=[websocket.websocket])
@@ -57,9 +105,12 @@ def websocket_app(ws):
             continue
 
         if data['_type'] == 'join':
+            if not data['name']:
+                print("client sent empty name")
+                return
             thisId = str(uuid.uuid4())
             print("client joined", thisId)
-            players[thisId] = {'id': thisId, 'name': data['name'], 'location': [0, 0, 0], 'rotation': [0, 0, 0], 'moveSpeed': random.randint(1, 20) * 0.01, 'health':100}
+            players[thisId] = {'id': thisId, 'name': data['name'], 'location': [0, 0, 0], 'rotation': [0, 0, 0], 'moveSpeed': random.randint(1, 20) * 0.01, 'health':100, 'fireCooldown': FIRE_COOLDOWN}
 
             if terrainData == []:
                 print("using terrain data from this client", data['terrainType'], data['terrainSeed'])
@@ -67,27 +118,57 @@ def websocket_app(ws):
                 ws.send(json.dumps({'_type': 'id', 'id': thisId}))
             else:
                 ws.send(json.dumps({'_type': 'id', 'id': thisId, 'terrainType': terrainData[0], 'terrainSeed': terrainData[1]}))
+            messages.append({"for": thisId, "message": "Welcome "+data['name']})
+        
+        elif data['_type'] == 'messages':
+            # TODO: Test this
+            latestMessage = None
+            lastPersistentMessage = None
+            for message in messages[:]:
+                if message['for'] == thisId:
+                    latestMessage = message
+                    messages.remove(message)
+                    if 'persistent' in message and message['persistent']:
+                        print('persistent message', message)
+                        lastPersistentMessage = message
+            if latestMessage is not None and not lastPersistentMessage:
+                print("Sending message", latestMessage)
+                ws.send(json.dumps({'_type':'message', 'message': latestMessage}))
+            elif lastPersistentMessage is not None:
+                print("Sending persistent message", lastPersistentMessage)
+                ws.send(json.dumps({'_type':'message', 'message': lastPersistentMessage}))
 
-
+            
+            
         
         elif data['_type'] == 'keyState':
-            if players[thisId] is not None:
+            if thisId in players:
                 players[thisId]['keyState'] = data['keyState']
         
         elif data['_type'] == 'fire':
-            if players[thisId] is not None:
+            if thisId in players:
                 bulletUuid = str(uuid.uuid4())
-                projectiles[bulletUuid] = {'id': bulletUuid, '_type': 'bullet','owner': thisId, 'velocity': data['velocity'], 'location': data['location'], 'rotation': data['rotation'], 'lifetime': 5000}
+                if players[thisId]['fireCooldown'] <= 0:
+                    players[thisId]['fireCooldown'] = FIRE_COOLDOWN
+                    v = three.calculate_velocity_from_quaternion(three.quaternion_from_tuple(data['quaternion']), 2)
+                    projectiles[bulletUuid] = {'id': bulletUuid, '_type': 'bullet','owner': thisId, 'velocity': v, 'location': data['location'], 'rotation': data['rotation'], 'lifetime': 5000}
         
+        elif data['_type'] == 'missileLaunch':
+            if thisId in players:
+                missileUuid = str(uuid.uuid4())
+                if players[thisId]['fireCooldown'] <= 0:
+                    players[thisId]['fireCooldown'] = FIRE_COOLDOWN
+                    projectiles[missileUuid] = {'id': missileUuid, '_type': 'missile','owner': thisId, 'target': data['target'], 'location': data['location'], 'rotation': data['rotation'], 'lifetime': 5000}
         elif data['_type'] == 'updatePosition':
-            if players[thisId] is not None:
+            if thisId in players:
                 players[thisId]['location'] = data['location']
                 players[thisId]['rotation'] = data['rotation']
         
         elif data['_type'] == "update":
             ws.send(json.dumps({'_type': 'update', 'players': players, 'projectiles': projectiles}))
 
-    del players[thisId]
+    if thisId in players:
+        del players[thisId]
     print('connection closed')
 
 app.run(host='0.0.0.0', port=3412, server=websocket.GeventWebSocketServer)

@@ -322,7 +322,7 @@
             window.parent.postMessage("changeTerrain");
         })
 
-        function saveToLocalStorage() {
+        function saveToLocalStorage(singleplayer = true) {
             // Validate inputs
             const inputs = [
                 document.getElementById('proxyFuseDistance'),
@@ -423,11 +423,12 @@
             
             
 
-            window.parent.postMessage("startGame");
+            if (singleplayer) window.parent.postMessage("startGame");
+            else window.parent.postMessage("startMp");
         }
 
         function sendStartMp() {
-            window.parent.postMessage("startMp");
+            saveToLocalStorage(false);
         }
     </script>
 </body>
