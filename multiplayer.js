@@ -1,9 +1,9 @@
 import global from './variableHandler.js';
 import * as THREE from 'three';
+import { BatchedRenderer, ParticleSystem, PointEmitter, ColorOverLife, SizeOverLife, IntervalValue, ConstantValue, ConstantColor, ColorRange, PiecewiseBezier, Bezier, RenderMode } from './lib/three.quarks.js';
 import { Terrain, seed } from './lib/THREETerrainModule.js';
 
 import { createThermalShaderMaterial } from './thermalShader.js';
-import { update } from './lib/tween.esm.js';
 
 let player;
 var xS = 400, yS = 400;
@@ -72,6 +72,7 @@ function isMeshVisible(camera, mesh) {
 }
 
 export function startMp() {
+    const clock = new THREE.Clock();
 
     function displayGameOver() {
         healthText.textContent = "You died!";
@@ -101,6 +102,45 @@ export function startMp() {
     global.miscSettings = JSON.parse(localStorage.getItem('miscSettings'));
     global.missileSpecs = JSON.parse(localStorage.getItem('missileSpecs'));
     let name = prompt("Enter your name: ");
+
+    const textureLoader = new THREE.TextureLoader();
+    const particleTexture = textureLoader.load('assets/fire.png');
+    const smokeTrailConfig = {
+        duration: Infinity,
+        looping: true,
+        startLife: new IntervalValue(1, 3), // Smoke particles live between 1 and 3 seconds
+        startSpeed: new ConstantValue(0.5),
+        startSize: new IntervalValue(0.5, 1.5), // Smoke particles start between 0.5 and 1.5 in size
+        startColor: new ConstantColor(new THREE.Vector4(0.5, 0.5, 0.5, 1)), // Gray smoke color with full opacity
+        worldSpace: false,
+      
+        maxParticle: 200,
+        emissionOverTime: new ConstantValue(10), // Continuous emission
+        emissionBursts: [], // No bursts for a continuous trail
+      
+        shape: new PointEmitter(),
+        material: new THREE.MeshBasicMaterial({
+          map: particleTexture,
+          blending: THREE.NormalBlending,
+          transparent: true,
+        }),
+        renderOrder: 2,
+        renderMode: RenderMode.Mesh
+      };
+    const smokeTrail = new ParticleSystem(smokeTrailConfig);
+    smokeTrail.addBehavior(new ColorOverLife(new ColorRange(
+        new THREE.Vector4(0.5, 0.5, 0.5, 1), // Start color with full opacity
+        new THREE.Vector4(0.2, 0.2, 0.2, 0)  // End color with low opacity for fading effect
+      )));
+    smokeTrail.addBehavior(new SizeOverLife(new PiecewiseBezier([
+        [new Bezier(0.5, 1, 1.5, 2), 0] // Gradually increase the size over life
+      ])));
+    const batchSystem = new BatchedRenderer();
+    batchSystem.addSystem(smokeTrail);
+    global.scene.add(batchSystem);
+    global.scene.add(smokeTrail.emitter);
+    
+
 
     const hudDiv = document.createElement('div');
     hudDiv.id = 'hudDiv';
@@ -265,6 +305,10 @@ export function startMp() {
 
     function animate() {
         global.stats.begin();
+
+        id = requestAnimationFrame(animate);
+
+        const delta = clock.getDelta();
 
         if (keyState['w']) {
             if (global.miscSettings.controlMode == "2") {
@@ -580,6 +624,8 @@ export function startMp() {
             }
         }
 
+        
+
         if (closestMissile['id'] != null && keyState['b']) {
             const direction = new THREE.Vector3();
             const missilePosition = projectileModels[closestMissile['id']].position;
@@ -604,9 +650,19 @@ export function startMp() {
             global.composer.render();
         }
 
-        global.stats.end();
+        
 
-        id = requestAnimationFrame(animate);
+        if (closestMissile['id'] != null) {
+            smokeTrail.emitter.layers.set(0);
+            smokeTrail.emitter.position.copy(projectileModels[closestMissile['id']].position);
+            batchSystem.update(delta);
+        } else {
+            smokeTrail.emitter.layers.set(1);
+        }
+
+        
+
+        global.stats.end();
     }
     
     window.addEventListener('resize', () => {
