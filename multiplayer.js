@@ -1,6 +1,6 @@
 import global from './variableHandler.js';
 import * as THREE from 'three';
-import { BatchedRenderer, ParticleSystem, PointEmitter, ColorOverLife, SizeOverLife, IntervalValue, ConstantValue, ConstantColor, ColorRange, PiecewiseBezier, Bezier, RenderMode } from './lib/three.quarks.js';
+import { BatchedRenderer, ParticleSystem, PointEmitter, SphereEmitter, ColorOverLife, SizeOverLife, IntervalValue, ConstantValue, ConstantColor, ColorRange, PiecewiseBezier, Bezier, RenderMode, ApplyForce } from './lib/three.quarks.js';
 import { Terrain, seed } from './lib/THREETerrainModule.js';
 
 import { createThermalShaderMaterial } from './thermalShader.js';
@@ -104,36 +104,62 @@ export function startMp() {
     let name = prompt("Enter your name: ");
 
     const textureLoader = new THREE.TextureLoader();
-    const particleTexture = textureLoader.load('assets/fire.png');
     const smokeTrailConfig = {
         duration: Infinity,
-        looping: true,
-        startLife: new IntervalValue(1, 3), // Smoke particles live between 1 and 3 seconds
-        startSpeed: new ConstantValue(0.5),
-        startSize: new IntervalValue(0.5, 1.5), // Smoke particles start between 0.5 and 1.5 in size
-        startColor: new ConstantColor(new THREE.Vector4(0.5, 0.5, 0.5, 1)), // Gray smoke color with full opacity
-        worldSpace: false,
+        looping: false,
+        startLife: new IntervalValue(5, 5.5), // Smoke particles live between 1 and 3 seconds
+        startSpeed: new IntervalValue(0.1,0.5),
+        startSize: new IntervalValue(0.2, 0.5), // Smoke particles start between 0.5 and 1.5 in size
+        startColor: new ConstantColor(new THREE.Vector4(1, 1, 1, 1)),
+        worldSpace: true,
       
-        maxParticle: 200,
-        emissionOverTime: new ConstantValue(10), // Continuous emission
+        maxParticle: 1000,
         emissionBursts: [], // No bursts for a continuous trail
       
-        shape: new PointEmitter(),
-        material: new THREE.MeshBasicMaterial({
-          map: particleTexture,
+        shape: new SphereEmitter({
+          radius: 0.1,}),
+        material: new THREE.MeshLambertMaterial({
+          map: textureLoader.load('assets/smoke_01.png'),
           blending: THREE.NormalBlending,
           transparent: true,
         }),
         renderOrder: 2,
-        renderMode: RenderMode.Mesh
+        renderMode: RenderMode.Mesh,
       };
+      const explosionConfig = {
+        duration: 0.5, // Duration of the emission in seconds
+        looping: false, // No looping for an explosion
+        startLife: new IntervalValue(0.5, 1), // Particles live between 1.0 and 1.5 seconds
+        startSpeed: new IntervalValue(10, 20), // Speed range for the explosion
+        startSize: new IntervalValue(2, 2.5), // Particles start between size 2 and 5
+        startColor: new ConstantColor(new THREE.Vector4(1, 0.5, 0, 1)), // Bright orange color
+        worldSpace: true, // Particles move in world space
+      
+        maxParticle: 1000, // Maximum number of particles
+        emissionOverTime: new Bezier(300, 300, 0, 0),
+      
+        shape: new SphereEmitter({
+          radius: 1, // Emit particles from a small sphere for a dispersed effect
+        }),
+        material: new THREE.MeshLambertMaterial({
+          map: textureLoader.load('assets/scorch_03.png'), // Load your texture
+          blending: THREE.NormalBlending,
+          transparent: true,
+        }),
+        renderOrder: 3,
+        renderMode: RenderMode.Mesh, // Render mode set to Mesh
+      };
+      
+      
     const smokeTrail = new ParticleSystem(smokeTrailConfig);
     smokeTrail.addBehavior(new ColorOverLife(new ColorRange(
-        new THREE.Vector4(0.5, 0.5, 0.5, 1), // Start color with full opacity
-        new THREE.Vector4(0.2, 0.2, 0.2, 0)  // End color with low opacity for fading effect
+        new THREE.Vector4(1,1,1, 1), // Start color with full opacity
+        new THREE.Vector4(1, 1, 1, 0),  // End color with low opacity for fading effect
+        2, // Adjust the life time to match the new duration
+        5
       )));
     smokeTrail.addBehavior(new SizeOverLife(new PiecewiseBezier([
-        [new Bezier(0.5, 1, 1.5, 2), 0] // Gradually increase the size over life
+        [new Bezier(0.5, 1, 5, 2), 0] // Gradually increase the size over life
       ])));
     const batchSystem = new BatchedRenderer();
     batchSystem.addSystem(smokeTrail);
@@ -380,7 +406,15 @@ export function startMp() {
 
         for (let projectile in projectileModels) {
             if (!projectiles[projectile]) {
+                
+                const explosion = new ParticleSystem(explosionConfig);
+                batchSystem.addSystem(explosion);
+                console.log(explosion);
+                global.scene.add(explosion.emitter);
+                explosion.emitter.position.copy(projectileModels[projectile].position);
+
                 global.scene.remove(projectileModels[projectile]);
+
                 document.getElementById(projectile).remove();
                 projectileModels[projectile].geometry.dispose();
                 projectileModels[projectile].material.dispose();
@@ -577,7 +611,7 @@ export function startMp() {
         for (const i in projectiles) {
             if (projectiles[i]['_type'] == 'missile') {
                 const dist = global.camera.position.distanceTo(projectileModels[i].position);
-                if (keyState['b'] && projectiles[i]['owner'] == uuid) {
+                if (projectiles[i]['owner'] == uuid) {
                     if (closestMissile['distance'] > dist) {
                         closestMissile = {'id': i, 'distance': dist};
                     }
@@ -624,6 +658,16 @@ export function startMp() {
             }
         }
 
+        if (closestMissile['id'] != null) {
+            smokeTrail.emissionOverTime = new IntervalValue(200,300);
+            
+            smokeTrail.emitter.position.copy(projectileModels[closestMissile['id']].position);
+            smokeTrail.emitter.rotation.copy(projectileModels[closestMissile['id']].rotation);
+        } else {
+            smokeTrail.emissionOverTime = new ConstantValue(0);
+        }
+
+        batchSystem.update(delta);
         
 
         if (closestMissile['id'] != null && keyState['b']) {
@@ -636,8 +680,10 @@ export function startMp() {
             direction.normalize();
 
             // Offset the camera position to be 5 units behind the missile, along the direction to the target
-            const cameraDistance = 10;
+            const cameraDistance = 5;
             missileCam.position.copy(missilePosition).sub(direction.multiplyScalar(cameraDistance));
+            missileCam.position.x += 2;
+            missileCam.position.z += 2;
 
             // Set the camera to look directly at the target
             missileCam.lookAt(target);
@@ -649,18 +695,6 @@ export function startMp() {
         } else {
             global.composer.render();
         }
-
-        
-
-        if (closestMissile['id'] != null) {
-            smokeTrail.emitter.layers.set(0);
-            smokeTrail.emitter.position.copy(projectileModels[closestMissile['id']].position);
-            batchSystem.update(delta);
-        } else {
-            smokeTrail.emitter.layers.set(1);
-        }
-
-        
 
         global.stats.end();
     }
