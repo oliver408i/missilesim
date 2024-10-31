@@ -167,9 +167,8 @@ export function startMp() {
 
     const messageText = document.createElement('div');
     messageText.style.position = 'absolute';
-    messageText.style.top = '40px';
-    messageText.style.right = '10px';
-    messageText.style.color = 'white';
+    messageText.style.top = '20px';
+    messageText.style.color = 'yellow';
     messageText.style.fontSize = '24px';
     messageText.style.fontFamily = 'SHP';
     messageText.style.zIndex = '1';
@@ -194,6 +193,9 @@ export function startMp() {
             socket.send(JSON.stringify({
                 '_type': 'update',
             }))
+            global.socket.send(JSON.stringify({
+                "_type": "messages"
+            }))
         }
         else if (data['_type'] == 'update') {
             if (data['players']) {
@@ -201,12 +203,13 @@ export function startMp() {
                 projectiles = data['projectiles'];
                 if (id == null && uuid != null) {
                     console.log("Starting game loop. User "+uuid)
-            
-                    global.socket.send(JSON.stringify({
-                        "_type": "messages"
-                    }))
+                    messageText.style.left = `${window.innerWidth / 2 - messageText.offsetWidth / 2}px`;
+                    
                     id = requestAnimationFrame(animate);
                 }
+                global.socket.send(JSON.stringify({
+                    "_type": "messages"
+                }))
 
                 global.socket.send(JSON.stringify({
                     '_type': 'update',
@@ -220,9 +223,7 @@ export function startMp() {
                 messageText.classList.remove('messages-fade-out');
                 messageText.classList.add('messages-fade-out');
             }
-            global.socket.send(JSON.stringify({
-                "_type": "messages"
-            }))
+            
         }
     }
 
@@ -575,7 +576,7 @@ export function startMp() {
                 if (projectiles[i]['owner'] == uuid) {
                     marker.style.borderColor = 'blue';
                 }
-                marker.textContent = ''+Math.round(dist);
+                marker.textContent = Math.round(dist);
             }
         }
 
@@ -589,7 +590,7 @@ export function startMp() {
             direction.normalize();
 
             // Offset the camera position to be 5 units behind the missile, along the direction to the target
-            const cameraDistance = 5;
+            const cameraDistance = 10;
             missileCam.position.copy(missilePosition).sub(direction.multiplyScalar(cameraDistance));
 
             // Set the camera to look directly at the target
@@ -616,8 +617,9 @@ export function startMp() {
         global.camera.aspect = width / height;
         global.camera.updateProjectionMatrix();
         centerDiv(hudDiv);
-        centerDiv(seekerRingInner);
         centerDiv(seekerRingOuter);
+        centerDiv(seekerRingInner);
+        messageText.style.left = `${window.innerWidth / 2 - messageText.offsetWidth / 2}px`;
     });
 }
 

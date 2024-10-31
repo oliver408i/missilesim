@@ -23,7 +23,7 @@ projectiles = {}
 terrainData = []
 messages = []
 
-def tick(players, projectiles):
+def tick(players, projectiles, messages):
     while True:
         ikeys = list(projectiles.keys())
         for i in ikeys:
@@ -97,7 +97,7 @@ def tick(players, projectiles):
                 players[i]['fireCooldown'] -= 1
         time.sleep(0.01)
 
-gameThread = threading.Thread(target=tick, daemon=True, args=(players, projectiles))
+gameThread = threading.Thread(target=tick, daemon=True, args=(players, projectiles, messages))
 gameThread.start()
 
 FIRE_COOLDOWN = 20
@@ -148,7 +148,7 @@ def websocket_app(ws):
             if latestMessage is not None and not lastPersistentMessage:
                 print("Sending message", latestMessage)
                 ws.send(json.dumps({'_type':'message', 'message': latestMessage}))
-            elif lastPersistentMessage is not None:
+            if lastPersistentMessage is not None:
                 print("Sending persistent message", lastPersistentMessage)
                 ws.send(json.dumps({'_type':'message', 'message': lastPersistentMessage}))
 
